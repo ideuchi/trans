@@ -66,7 +66,6 @@ secret=                                          # input your API secret
 =====snip=====
 ↓
 編集後(after editing)：
-~~~~
 # (required) account information for API
 name=YOUR_NAME                                   # input your account name
 key=YOUR_KEY                                     # input your API key
