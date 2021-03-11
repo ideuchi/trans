@@ -1,0 +1,308 @@
+#!/bin/bash
+
+## Settings for translation
+kind=${1:-"text"}               # translation kind (text/file/dir), default kind is text
+src=${2:-""}                    # source text/file/directory
+engine=${3:-"generalNT"}        # default is generalNT (edit this param as you like)
+src_lang=${4:-"ja"}             # default source language is Japanese (edit this param as you like)
+tgt_lang=${5:-"en"}             # default target language is English (edit this param as you like)
+
+python=python3                  # command name for executing python script
+interval=3                      # interval (seconds) for confirming status of file translation
+
+
+## Set API information (if engine, src_lang, tgt_lang are defined in APIinfo.ini, command line options are overwritten)
+trans_dir=$(cd $(dirname $0); pwd)
+. ${trans_dir}/APIinfo.ini     # set API information (name, key, secret) and request tool (sh/py)
+
+## Get stdin if executed in pipe (if stdin exists, source text from command line option is overwritten)
+if [ -p /dev/stdin ]; then src=`cat -`; fi
+
+
+## Explanation of I/F
+if [ "${src}" == "" ] ; then
+  echo "Usege: trans [kind] 'source text' [engine] [source language] [target language]"
+  echo "       [kind] can be selected from 'text' 'file' 'dir'"
+  echo "       [engine], [source language], [target language] can be selected from engine list and language list in APIinfo.ini"
+  exit 1
+fi
+
+
+## Common function for API request with curl and openssl commands (used if request tool is "sh")
+# Parameters:
+#   1: URL of API
+#   2: assosiative array that includes below:
+#        name, key, secret, <other params>
+#   3: parameter for file translation
+api_request() {
+  request_url=${1}
+  declare -n parameters_ref=${2}
+  request_file=${3}
+  
+  # concatenate all parameters
+  additional_parameters=""
+  request_secret=""
+  for refkey in "${!parameters_ref[@]}"; do
+    if [ "${refkey}" == "secret" ] ; then
+      request_secret="${parameters_ref[${refkey}]}"
+    else
+      if [ "${additional_parameters}" == "" ] ; then
+        additional_parameters="${refkey}=${parameters_ref[${refkey}]}"
+      else
+        additional_parameters="${additional_parameters}\\n${refkey}=${parameters_ref[${refkey}]}"
+      fi
+    fi
+  done
+  additional_parameters=`echo -e "${additional_parameters}" | sort -t '=' -k1 | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\\\n/g'`
+  
+  # OAuth preparation
+  request_url_string=$(echo -n "${request_url}" | curl -Gso /dev/null -w %{url_effective} --data-urlencode @- "" | cut -c 3-)
+  oauth_nonce=$(head -c 32 < /dev/urandom | base64 | tr -d '+/=')
+  oauth_timestamp=$(date +%s)
+  oauth_parameters="oauth_consumer_key=${parameters_ref["key"]}\\noauth_nonce=${oauth_nonce}\\noauth_timestamp=${oauth_timestamp}\\noauth_signature_method=HMAC-SHA1\\noauth_version=1.0\\n"
+  request_parameters_string=`echo -e "${oauth_parameters}${additional_parameters}" | sort -t '=' -k1 | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\&/g' | curl -Gso /dev/null -w %{url_effective} --data-urlencode @- "" | sed -E 's/..(.*).../\1/'`
+  signature_base_string="POST&${request_url_string}&${request_parameters_string}"
+  signing_key="${request_secret}&"
+  oauth_signature="$(echo -n "${signature_base_string}" | openssl dgst -sha1 -binary -hmac "${signing_key}" | base64 | curl -Gso /dev/null -w %{url_effective} --data-urlencode @- "" | sed -E 's/..(.*).../\1/')"
+  
+  # assemble curl request commands
+  request_url_parameters=`echo ${additional_parameters} | sed -e 's/\\\\n/\&/g'`
+  if [ "${request_file}" == "" ] ; then
+    # text translation API accepts parameters with 'curl -d' option
+    curl_request_text="curl -X POST --url ${request_url} -d \"${request_url_parameters}\" -H \"Authorization: OAuth oauth_consumer_key=${parameters_ref["key"]}, oauth_nonce=${oauth_nonce}, oauth_signature=${oauth_signature}, oauth_signature_method=HMAC-SHA1, oauth_timestamp=${oauth_timestamp}, oauth_version=1.0\""
+    eval ${curl_request_text}
+  else
+    # file translation API accepts parameters with URL and 'curl -F' option
+    request_curl_options=`echo ${additional_parameters} | sed -e 's/\\\\n/ -F /g'`
+    if [ "${request_file:0:2}" == "//" ] ; then
+     curl_request_file_statget="curl -X POST --url \"${request_url}?${request_url_parameters}\" -F ${request_curl_options} -H \"Authorization: OAuth oauth_consumer_key=${parameters_ref["key"]}, oauth_nonce=${oauth_nonce}, oauth_signature=${oauth_signature}, oauth_signature_method=HMAC-SHA1, oauth_timestamp=${oauth_timestamp}, oauth_version=1.0\""
+      eval ${curl_request_file_statget}
+    else
+      curl_request_file_set="curl -X POST --url \"${request_url}?${request_url_parameters}\" -F ${request_curl_options} -F file=${request_file} -H \"Authorization: OAuth oauth_consumer_key=${parameters_ref["key"]}, oauth_nonce=${oauth_nonce}, oauth_signature=${oauth_signature}, oauth_signature_method=HMAC-SHA1, oauth_timestamp=${oauth_timestamp}, oauth_version=1.0\""
+      eval ${curl_request_file_set}
+    fi
+  fi
+}
+
+
+## Function for requesting text translation (used if request tool is "sh")
+# This function uses shell variables below, call this function after setting these variables
+# ${name}, ${key}, ${secret}, ${engine}, ${src_lang}, ${tgt_lang}
+# This function receives parameters below, call this function with these parameters
+# ${text_src}    ## ${text_src} is a string to translate
+text_sh() {
+  # Make request URL
+  url=https://mt-auto-minhon-mlt.ucri.jgn-x.jp/api/mt/${engine}_${src_lang}_${tgt_lang}/
+  text_src=${1}
+  
+  # URL encode for source text
+  text=$(echo -en "${text_src}" | curl -Gso /dev/null -w %{url_effective} --data-urlencode @- "" | cut -c 3-)
+  
+  # prepare parameters for api_request
+  declare -A parameters
+  parameters["name"]=${name}
+  parameters["key"]=${key}
+  parameters["secret"]=${secret}
+  parameters["type"]=json
+  parameters["text"]=${text}
+  
+  echo -e `api_request ${url} parameters 2> /dev/null | awk -F'"text-t":"' '{ print $2 }' | awk -F'"' '$0 != "" { print $1 }'`
+}
+
+
+## Function for requesting file translation (set) (used if request tool is "sh")
+# This function uses shell variables below, call this function after setting these variables
+# ${name}, ${key}, ${secret}, ${engine}, ${src_lang}, ${tgt_lang}
+# This function receives parameters below, call this function with these parameters
+# ${file_set_src}    ## ${file_set_src} is a name of file to translate
+file_set_sh() {
+  url=https://mt-auto-minhon-mlt.ucri.jgn-x.jp/api/trans_file/set/
+  file_set_src=${1}
+  mt_id="${engine}_${src_lang}_${tgt_lang}"
+  
+  # source data preparation
+  file=@${file_set_src}
+  
+  # prepare parameters for api_request
+  declare -A parameters
+  parameters["name"]=${name}
+  parameters["key"]=${key}
+  parameters["secret"]=${secret}
+  parameters["type"]=json
+  parameters["mt_id"]=${mt_id}
+  parameters["title"]=trans
+  parameters["file"]=file
+  
+  echo -e `api_request ${url} parameters ${file} 2> /dev/null | awk -F'"pid":' '{ print $2 }' | awk -F'}' '$0 != "" { print $1 }'`
+}
+
+
+## Function for requesting file translation (status) (used if request tool is "sh")
+# This function uses shell variables below, call this function after setting these variables
+# ${name}, ${key}, ${secret}
+# This function receives parameters below, call this function with these parameters
+# ${pid}
+file_status_sh() {
+  url=https://mt-auto-minhon-mlt.ucri.jgn-x.jp/api/trans_file/status/
+  status_pid=${1}
+  
+  # prepare parameters for api_request
+  declare -A parameters
+  parameters["name"]=${name}
+  parameters["key"]=${key}
+  parameters["secret"]=${secret}
+  parameters["pid"]=${status_pid}
+  parameters["type"]=json
+  
+  echo -e `api_request ${url} parameters "//status" 2> /dev/null | awk -F'"state":' '{ print $2 }' | awk -F',' '$0 != "" { print $1 }'`
+}
+
+
+## Function for requesting file translation (get) (used if request tool is "sh")
+# This function uses shell variables below, call this function after setting these variables
+# ${name}, ${key}, ${secret}
+# This function receives parameters below, call this function with these parameters
+# ${pid}, ${file}    ## ${file} is a name of file for translated result
+file_get_sh() {
+  url=https://mt-auto-minhon-mlt.ucri.jgn-x.jp/api/trans_file/get/
+  get_pid=${1}
+  get_file=${2}
+  
+  # prepare parameters for api_request
+  declare -A parameters
+  parameters["name"]=${name}
+  parameters["key"]=${key}
+  parameters["secret"]=${secret}
+  parameters["pid"]=${get_pid}
+  parameters["type"]=json
+  
+  api_request ${url} parameters "//get" 2> /dev/null > "${get_file}"
+  echo "${get_file}"
+}
+
+
+## Function for file translation (set/status/get)
+# This function uses shell variables below, call this function after setting these variables
+# ${name}, ${key}, ${secret}, ${engine}, ${src_lang}, ${tgt_lang}, ${tool}
+# This function receives parameters below, call this function with these parameters
+# ${file_src}, ${file_tgt}    ## the names of source file and target file, target file name is arbitrary
+function file_trans(){
+  file_src=${1}
+  file_tgt=${2}
+  
+  # if target file name is not specified, add target language name to source file name
+  if [ "${file_tgt}" == "" ]; then
+    file_tgt="${file_src%.*}_${tgt_lang}.${file_src##*.}"
+  fi
+  
+  if [ "${tool}" == "sh" ]; then
+    pid=`file_set_sh ${file_src}`
+  fi
+  if [ "${tool}" == "py" ]; then
+    pid=`${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} "file" "set" "${file_src}" ${engine} ${src_lang} ${tgt_lang}`
+  fi
+  
+  state=0
+  while [ "`echo \"sqrt(${state}^2)\" | bc`" != "2" ]; do
+    if [ "${tool}" == "sh" ]; then
+      state=`file_status_sh ${pid}`
+    fi
+    if [ "${tool}" == "py" ]; then
+      state=`${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} "file" "status" ${pid}`
+    fi
+    echo "translating \"${file_src}\" to \"${file_tgt}\", pid is ${pid}, state is ${state}."
+    if [ ${interval} -gt 0 ]; then
+      sleep ${interval}
+    else
+      sleep 5  # if interval has invalid value, sleep 5 sec
+    fi
+  done
+  if [ "${state}" == "-2" ]; then
+    echo "failed to translate ${file_src}."
+  else
+    if [ "${tool}" == "sh" ]; then
+      outfile=`file_get_sh ${pid} "${file_tgt}"`
+    fi
+    if [ "${tool}" == "py" ]; then
+      outfile=`${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} "file" "get" ${pid} "${file_tgt}"`
+    fi
+    echo "translated results are written in ${outfile}."
+  fi
+}
+
+
+## Function for directory translation (recursively)
+function dir_trans(){
+  local src_dir=${1}
+  local tgt_dir=${2}
+  local command=${3}
+  
+  cd "${src_dir}"
+  echo "translating files in `pwd`"
+  {
+    IFS=$'\n'
+    for line in `ls -a` ; do
+      local child=${line}
+      # skip special files start with "." , ".."
+      if [[ "${child}" =~ ^(.|..)$ ]]; then continue; fi
+      if [ -d "${child}" ]; then
+        mkdir -p "${tgt_dir}/${child}"
+        dir_trans "${src_dir}/${child}" "${tgt_dir}/${child}" ${command}
+      else
+        local ext=.${child##*.}
+        # execute translation with listed extensions
+        case ${ext} in
+          *.txt)  ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
+          *.html) ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
+          *.docx) ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
+          *.pptx) ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
+          *.xlsx) ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
+          *.csv)  ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
+          *.md)   ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
+          *.srt)  ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
+          *.po)   ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
+          *.pot)  ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
+          *.pdf)  ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
+          *.odt)  ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
+          *.odp)  ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
+          *.ods)  ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
+          *.rst)  ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
+          *.tex)  ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
+          *.tsv)  ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
+          *.tmx)  ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
+          *.xlf)  ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
+        esac
+      fi
+    done
+  }
+  cd ../
+}
+
+
+
+## Main procedure
+if [ "${kind}" == "text" ]; then
+  if [ "${tool}" == "sh" ]; then
+    text_sh "${src}"
+  fi
+  if [ "${tool}" == "py" ]; then
+    ${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} ${kind} "" "${src}" ${engine} ${src_lang} ${tgt_lang}
+  fi
+fi
+
+if [ "${kind}" == "file" ]; then
+  file_trans "`readlink -f ${src}`"
+fi
+
+if [ "${kind}" == "dir" ]; then
+  if [ ! -d ${src} ]; then
+    echo ${src} is not directory.
+    exit 1
+  else
+    echo "start translating files from ${src} to ${src}_${tgt_lang}"
+  fi
+  
+  mkdir -p "${src}_${tgt_lang}"
+  dir_trans "`readlink -f ${src}`" "`readlink -f ${src}_${tgt_lang}`" file_trans
+fi
+
