@@ -122,9 +122,9 @@ try:
       TGT=ENGINE
   if KIND == 'lang_detect':
     d = json.loads(res.text)
-    for n in range(len(d['resultset']['result']['langdetect']['item'])):
-      TGT = TGT + d['resultset']['result']['langdetect']['item'][n]['lang'] + ':' + d['resultset']['result']['langdetect']['item'][n]['rate']
-      if n != len(d['resultset']['result']['langdetect']['item']) - 1:
+    for n in range(len(d['resultset']['result']['langdetect'])):
+      TGT = TGT + d['resultset']['result']['langdetect'][n]['lang'] + ':' + d['resultset']['result']['langdetect'][n]['rate']
+      if n != len(d['resultset']['result']['langdetect']) - 1:
         TGT = TGT + '\n'
   print(TGT)
 except Exception as e:
