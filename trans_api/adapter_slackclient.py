@@ -18,20 +18,6 @@ slack_events_adapter = SlackEventAdapter(SLACK_VERIFICATION_TOKEN)
 
 DEBUG_FILE = 'debug.txt'
 
-# Example responder to greetings
-@slack_events_adapter.on('message')
-def handle_message(event_data):
-    event = event_data["event"]
-    time = datetime.datetime.now()
-    str_time = time.strftime('%Y/%m/%d %H:%M:%S')
-    # If the incoming message contains 'hi', then respond with a 'Hello' message
-    if message.get('subtype') is None and 'hi' in message.get('text'):
-        channel = message['channel']
-        message = 'Hello <@%s>! :tada:' % message['user']
-        with open(DEBUG_FILE, 'a') as f:
-            print('\n'+str_time+' response to message event:'+message+'.\n', file=f)
-        CLIENT.api_call(api_method='chat.postMessage', json={'channel': channel,'text': text})
-
 # reaction for emoji
 @slack_events_adapter.on('reaction_added')
 def reaction_added(event_data):
