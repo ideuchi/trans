@@ -36,7 +36,8 @@ def slack_events(request, *args, **kwargs):  # cf. https://api.slack.com/events/
         # https://stackoverflow.com/questions/29780060/trying-to-parse-request-body-from-post-in-django
         event_data = json.loads(request.body.decode("utf-8"))
     except ValueError as e:  # https://stackoverflow.com/questions/4097461/python-valueerror-error-message
-        logging.info("ValueError: "+str(e))
+        with open(DEBUG_FILE, 'a') as f:
+            print('\nValueError: '+str(e), file=f)
         return HttpResponse("")
     with open(DEBUG_FILE, 'a') as f:
         print('\nevent_data: '+str(event_data), file=f)
