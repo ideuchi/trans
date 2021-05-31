@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## Settings for translation
-kind=${1:-"text"}               # translation kind (text/file/dir), default kind is text
+kind=${1:-"text"}               # translation kind (text/file/dir/lang_detect), default kind is text
 src=${2:-""}                    # source text/file/directory
 engine=${3:-"generalNT"}        # default is generalNT (edit this param as you like)
 src_lang=${4:-"ja"}             # default source language is Japanese (edit this param as you like)
@@ -279,6 +279,31 @@ function dir_trans(){
 }
 
 
+## Function for language detect
+# This function uses shell variables below, call this function after setting these variables
+# ${name}, ${key}, ${secret}, ${tool}
+# This function receives parameters below, call this function with these parameters
+# ${text_src}    ## ${text_src} is a string to detect language
+function lang_detect_sh(){
+  # Make request URL
+  url=https://mt-auto-minhon-mlt.ucri.jgn-x.jp/api/langdetect/
+  text_src=${1}
+  
+  # URL encode for source text
+  text=$(echo -en "${text_src}" | curl -Gso /dev/null -w %{url_effective} --data-urlencode @- "" | cut -c 3-)
+  
+  # prepare parameters for api_request
+  declare -A parameters
+  parameters["name"]=${name}
+  parameters["key"]=${key}
+  parameters["secret"]=${secret}
+  parameters["type"]=json
+  parameters["text"]=${text}
+  
+  echo -e `api_request ${url} parameters 2> /dev/null | awk -F'"lang":"' '{ print $2 }' | awk -F'"' '$0 != "" { print $1 }'`
+}
+
+
 
 ## Main procedure
 if [ "${kind}" == "text" ]; then
@@ -304,5 +329,14 @@ if [ "${kind}" == "dir" ]; then
   
   mkdir -p "${src}_${tgt_lang}"
   dir_trans "`readlink -f ${src}`" "`readlink -f ${src}_${tgt_lang}`" file_trans
+fi
+
+if [ "${kind}" == "lang_detect" ]; then
+  if [ "${tool}" == "sh" ]; then
+    lang_detect_sh "${src}"
+  fi
+  if [ "${tool}" == "py" ]; then
+    ${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} ${kind} "" "${src}" ${engine} ${src_lang} ${tgt_lang}
+  fi
 fi
 

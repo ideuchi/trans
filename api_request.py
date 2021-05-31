@@ -9,7 +9,7 @@ Python3 OAuthRequest Module for NICT translation API
     1: name
     2: key
     3: secret
-    4: translation kind (text/file/dir)
+    4: translation kind (text/file/dir/lang_detect)
     5: translation subkind (for file translation)
     6: source text/file/directory
     7: translation engine (for detail, see APIinfo.ini)
@@ -26,7 +26,7 @@ NAME = sys.argv[1]
 KEY = sys.argv[2]
 SECRET = sys.argv[3]
 
-KIND = sys.argv[4]          # text/file/dir
+KIND = sys.argv[4]          # text/file/dir/lang_detect
 SUBKIND = sys.argv[5]       # file: set/status/get, 
 SRC = sys.argv[6]
 ENGINE = '' if len(sys.argv) <= 7 else sys.argv[7]
@@ -40,6 +40,8 @@ if KIND == 'text':
   URL = URL_BASE + 'mt/' + ENGINE + '_' + SRC_LANG + '_' + TGT_LANG + '/'
 if KIND == 'file':
   URL = URL_BASE + 'trans_file/' + SUBKIND + '/'
+if KIND == 'lang_detect':
+  URL = URL_BASE + 'langdetect/'
 
 consumer = OAuth1(KEY , SECRET)
 TGT = ''
@@ -78,6 +80,13 @@ if KIND == 'file' and SUBKIND == 'get':
     'pid': SRC,
     'type': 'json',
   }
+if KIND == 'lang_detect':
+  params = {
+    'key': KEY,
+    'name': NAME,
+    'text': SRC,
+    'type': 'json',
+  }
 
 try:
   if KIND == 'text':
@@ -87,6 +96,8 @@ try:
   if KIND == 'file' and SUBKIND == 'status':
     res = req.post(URL, data=params, auth=consumer)
   if KIND == 'file' and SUBKIND == 'get':
+    res = req.post(URL, data=params, auth=consumer)
+  if KIND == 'lang_detect':
     res = req.post(URL, data=params, auth=consumer)
   res.encoding = 'utf-8'
   if DEBUG == 'print_res':
@@ -109,6 +120,12 @@ try:
     with open(ENGINE, mode='wb') as fout:  # use ENGINE parameter as target file name
       fout.write(res.content)
       TGT=ENGINE
+  if KIND == 'lang_detect':
+    d = json.loads(res.text)
+    for n in range(len(d['resultset']['result']['langdetect']['item'])):
+      TGT = TGT + d['resultset']['result']['langdetect']['item'][n]['lang'] + ':' + d['resultset']['result']['langdetect']['item'][n]['rate']
+      if n != len(d['resultset']['result']['langdetect']['item']) - 1:
+        TGT = TGT + '\n'
   print(TGT)
 except Exception as e:
   print('=== Error ===')
