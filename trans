@@ -6,6 +6,7 @@ src=${2:-""}                    # source text/file/directory
 engine=${3:-"generalNT"}        # default is generalNT (edit this param as you like)
 src_lang=${4:-"ja"}             # default source language is Japanese (edit this param as you like)
 tgt_lang=${5:-"en"}             # default target language is English (edit this param as you like)
+debug=${6:-""}                  # debug flag
 
 python=python3                  # command name for executing python script
 interval=3                      # interval (seconds) for confirming status of file translation
@@ -199,7 +200,7 @@ function file_trans(){
     pid=`file_set_sh ${file_src}`
   fi
   if [ "${tool}" == "py" ]; then
-    pid=`${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} "file" "set" "${file_src}" ${engine} ${src_lang} ${tgt_lang}`
+    pid=`${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} "file" "set" "${file_src}" ${engine} ${src_lang} ${tgt_lang} ${debug}`
   fi
   
   state=0
@@ -311,7 +312,7 @@ if [ "${kind}" == "text" ]; then
     text_sh "${src}"
   fi
   if [ "${tool}" == "py" ]; then
-    ${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} ${kind} "" "${src}" ${engine} ${src_lang} ${tgt_lang}
+    ${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} ${kind} "" "${src}" ${engine} ${src_lang} ${tgt_lang} ${debug}
   fi
 fi
 
@@ -336,7 +337,7 @@ if [ "${kind}" == "lang_detect" ]; then
     lang_detect_sh "${src}"
   fi
   if [ "${tool}" == "py" ]; then
-    ${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} ${kind} "" "${src}" ${engine} ${src_lang} ${tgt_lang}
+    ${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} ${kind} "" "${src}" ${engine} ${src_lang} ${tgt_lang} ${debug}
   fi
 fi
 
