@@ -1,2 +1,8 @@
 ﻿requests_oauthlib
 requests
+django
+django_heroku
+djangorestframework
+gunicorn
+pyee
+slack_sdk
