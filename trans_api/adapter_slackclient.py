@@ -1,6 +1,8 @@
 from django.conf import settings
-SLACK_VERIFICATION_TOKEN = settings.SLACK_VERIFICATION_TOKEN
-SLACK_BOT_TOKEN = settings.SLACK_BOT_TOKEN
+import os
+
+SLACK_VERIFICATION_TOKEN = os.environ.get('SLACK_VERIFICATION_TOKEN','')
+SLACK_BOT_TOKEN = os.environ.get('SLACK_BOT_TOKEN','')
 
 from pyee import EventEmitter
 from slack_sdk import WebClient
