@@ -55,7 +55,6 @@ def slack_events(request, *args, **kwargs):  # cf. https://api.slack.com/events/
                       "Slack adapter has: %s" % (request_token, SLACK_VERIFICATION_TOKEN)
             raise PermissionDenied(message)
         event_type = event_data["event"]["type"]
-        logging.info("event_type: "+event_type)
         slack_events_adapter.emit(event_type, event_data)
         return HttpResponse("")
     # default case
