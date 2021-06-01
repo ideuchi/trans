@@ -17,6 +17,12 @@ class SlackEventAdapter(EventEmitter):
 slack_events_adapter = SlackEventAdapter(SLACK_VERIFICATION_TOKEN)
 
 DEBUG_FILE = 'debug.txt'
+def debug_msg(str):
+    with open(DEBUG_FILE, 'a') as f:
+        time = datetime.datetime.now()
+        str_time = time.strftime('%Y/%m/%d %H:%M:%S')
+        print('\n'+str_time+' '+str+'\n', file=f)
+
 RESPONCE_FILE = 'response.txt'
 
 langs = ['ar', 'de', 'en', 'es', 'fp', 'fr', 'id', 'it', 'ja', 'ko', 'my', 'pt', 'pt-BR', 'ru', 'th', 'vi', 'zh-CN', 'zh-TW']
@@ -43,10 +49,7 @@ def reaction_added(event_data):
     emoji = event['reaction']
     channel = event['item']['channel']
     ts = event['item']['ts']
-    with open(DEBUG_FILE, 'a') as f:
-        time = datetime.datetime.now()
-        str_time = time.strftime('%Y/%m/%d %H:%M:%S')
-        print('\n'+str_time+' starting handle reaction_added event\n', file=f)
+    debug_msg('starting handle reaction_added event.')
     # Get target language code from emoji (If emoji is not language code, ignore event)
     if emoji == 'us':
         emoji = 'en'
@@ -57,46 +60,32 @@ def reaction_added(event_data):
     tgt_lang = ''
     if is_lang_code(emoji):
         tgt_lang = emoji
-        time = datetime.datetime.now()
-        str_time = time.strftime('%Y/%m/%d %H:%M:%S')
-        with open(DEBUG_FILE, 'a') as f:
-            print('\n'+str_time+' emoji is in lang_list: '+emoji+'\n', file=f)
+        debug_msg('emoji is in lang_list: '+emoji)
     else:
-        time = datetime.datetime.now()
-        str_time = time.strftime('%Y/%m/%d %H:%M:%S')
-        with open(DEBUG_FILE, 'a') as f:
-            print('\n'+str_time+' emoji is not in lang_list: '+emoji+'\n', file=f)
+        debug_msg('emoji is not in lang_list: '+emoji)
         return HttpResponse('')
     # If same event is already received, ignore event
     with open(RESPONCE_FILE, 'a+') as f:
-        time = datetime.datetime.now()
-        str_time = time.strftime('%Y/%m/%d %H:%M:%S')
         if event_id in f.read():
-            with open(DEBUG_FILE, 'a') as f:
-                print('\n'+str_time+' event already handled: '+event_id+'\n', file=f)
+            debug_msg('event already handled: '+event_id)
             return HttpResponse('')
         else:
-            with open(DEBUG_FILE, 'a') as f:
-                print('\n'+str_time+' new event to handle: '+event_id+'\n', file=f)
+            debug_msg('new event to handle: '+event_id)
             print(event_id+'\n', file=f)
     # Get original message
     src_message = CLIENT.api_call(api_method='conversations.history', json={'channel': channel, 'inclusive': True, 'oldest': ts, 'limit': 1})['messages'][0]['text']
+    debug_msg('src message: '+src_message)
     proc_lang_detect = sp.Popen('./trans lang_detect "'+src_message+'"', shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
     src_lang, proc_lang_std_err = proc_lang_detect.communicate()
+    debug_msg('trans lang_detect src_lang: '+src_lang)
     if proc_lang_std_err != '':
-        with open(DEBUG_FILE, 'a') as f:
-            time = datetime.datetime.now()
-            str_time = time.strftime('%Y/%m/%d %H:%M:%S')
-            print('\n'+str_time+' trans lang_detect std_err: '+proc_lang_std_err+'.\n', file=f)
+        debug_msg('trans lang_detect std_err: '+proc_lang_std_err)
         return HttpResponse('')
     # Translate message
     trans_pairs = get_trans_pairs(src_lang, tgt_lang)
     trans_cmd = ''
     if len(trans_pairs) == 0:    # There's no translation pair
-        time = datetime.datetime.now()
-        str_time = time.strftime('%Y/%m/%d %H:%M:%S')
-        with open(DEBUG_FILE, 'a') as f:
-            print('\n'+str_time+' trans pairs not found: '+src_lang+' to '+tgt_lang+'\n', file=f)
+        debug_msg('trans pairs not found: '+src_lang+' to '+tgt_lang)
         return HttpResponse('')
     else:
         for i, pair in enumerate(trans_pairs):
@@ -107,12 +96,8 @@ def reaction_added(event_data):
                 trans_cmd = ' | ./trans text "" generalNT '+src_lang+' '+tgt_lang
     proc_trans = sp.Popen(trans_cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
     tgt_message, proc_trans_std_err = proc_lang_detect.communicate()
-    time = datetime.datetime.now()
-    str_time = time.strftime('%Y/%m/%d %H:%M:%S')
     if proc_trans_std_err != '':
-        with open(DEBUG_FILE, 'a') as f:
-            print('\n'+str_time+' '+trans_cmd+' std_err: '+proc_trans_std_err+'.\n', file=f)
+        debug_msg(trans_cmd+' std_err: '+proc_trans_std_err)
         return HttpResponse('')
-    with open(DEBUG_FILE, 'a') as f:
-        print('\n'+str_time+' response to reaction_added event '+trans_cmd+': '+tgt_message+'.\n', file=f)
+    debug_msg(response to reaction_added event '+trans_cmd+': '+tgt_message)
     CLIENT.api_call(api_method='chat.postMessage', json={'channel': channel, 'thread_ts': ts, 'text': tgt_message})
