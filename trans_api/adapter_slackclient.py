@@ -71,7 +71,6 @@ def reaction_added(event_data):
             return HttpResponse('')
         else:
             debug_msg('new event to handle: '+event_id)
-            print(event_id+'\n', file=f)
     # Get original message
     src_message = CLIENT.api_call(api_method='conversations.history', json={'channel': channel, 'inclusive': True, 'oldest': ts, 'limit': 1})['messages'][0]['text']
     debug_msg('src message: '+src_message)
