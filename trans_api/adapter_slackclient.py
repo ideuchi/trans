@@ -72,7 +72,9 @@ def reaction_added(event_data):
         else:
             debug_msg('new event to handle: '+event_id)
     # Get original message
-    src_message = CLIENT.api_call(api_method='conversations.history', json={'channel': channel, 'inclusive': True, 'oldest': ts, 'limit': 1})['messages'][0]['text']
+    message_history = CLIENT.api_call(api_method='conversations.history', json={'channel': channel, 'inclusive': True, 'oldest': ts, 'limit': 1})
+    debug_msg('message history: '+str(message_history))
+    src_message = message_history['messages'][0]['text']
     debug_msg('src message: '+src_message)
     proc_lang_detect = sp.Popen('./trans lang_detect "'+src_message+'"', shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
     src_lang, proc_lang_std_err = proc_lang_detect.communicate()
