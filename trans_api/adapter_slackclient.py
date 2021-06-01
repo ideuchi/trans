@@ -36,6 +36,7 @@ def get_trans_pairs(lang1, lang2):
         return []
 
 # reaction for emoji
+@slack_events_adapter.on('reaction_added')
 def reaction_added(event_data):
     event_id = event_data['event_id']
     event = event_data['event']
