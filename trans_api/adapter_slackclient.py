@@ -28,9 +28,9 @@ def is_lang_code(str):
 def get_trans_pairs(lang1, lang2):
     if '_'.join([lang1, lang2]) in lang_pairs:    # direct translation
         return ['_'.join([lang1, lang2])]
-    else if ('_'.join([lang1, 'ja']) in lang_pairs) and ('_'.join(['ja', lang2]) in lang_pairs):    # pivot translation via ja
+    elif ('_'.join([lang1, 'ja']) in lang_pairs) and ('_'.join(['ja', lang2]) in lang_pairs):    # pivot translation via ja
         return ['_'.join([lang1, 'ja']), '_'.join(['ja', lang2]]
-    else if ('_'.join([lang1, 'en']) in lang_pairs) and ('_'.join(['en', lang2]) in lang_pairs):    # pivot translation via en
+    elif ('_'.join([lang1, 'en']) in lang_pairs) and ('_'.join(['en', lang2]) in lang_pairs):    # pivot translation via en
         return ['_'.join([lang1, 'en']), '_'.join(['en', lang2]]
     else:
         return []
