@@ -71,12 +71,12 @@ def reaction_added(event_data):
             return HttpResponse('')
         else:
             debug_msg('new event to handle: '+event_id)
-            print(event_id+'\n', file=f)
+            print(event_id, file=f)
     # Get original message
     message_history = CLIENT.conversations_history(channel=channel, inclusive=True, oldest=ts, limit=1)
     src_message = message_history['messages'][0]['text']
     debug_msg('src message: '+src_message)
-    lang_detect_cmd = './trans lang_detect "'+src_message+'"'
+    lang_detect_cmd = './trans lang_detect '+src_message
     debug_msg('lang_detect cmd: '+lang_detect_cmd)
     proc_lang_detect = sp.Popen(lang_detect_cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
     src_lang, proc_lang_std_err = proc_lang_detect.communicate()
