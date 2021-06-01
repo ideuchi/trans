@@ -11,6 +11,11 @@ from .adapter_slackclient import slack_events_adapter, SLACK_VERIFICATION_TOKEN
 # Create your views here.
 
 DEBUG_FILE = 'debug.txt'
+def debug_msg(str):
+    with open(DEBUG_FILE, 'a') as f:
+        time = datetime.datetime.now()
+        str_time = time.strftime('%Y/%m/%d %H:%M:%S')
+        print('\n'+str_time+' '+str+'\n', file=f)
 
 def render_json_response(request, data, status=None, support_jsonp=False):
     json_str = json.dumps(data, ensure_ascii=False, indent=2)
@@ -26,8 +31,6 @@ def render_json_response(request, data, status=None, support_jsonp=False):
 
 @csrf_exempt
 def slack_events(request, *args, **kwargs):  # cf. https://api.slack.com/events/url_verification
-    time = datetime.datetime.now()
-    str_time = time.strftime('%Y/%m/%d %H:%M:%S')
     with open(DEBUG_FILE, 'a') as f:
         print('\n'+str_time+' /slack_events called.\n', file=f)
     if request.method == 'GET':
@@ -36,11 +39,9 @@ def slack_events(request, *args, **kwargs):  # cf. https://api.slack.com/events/
         # https://stackoverflow.com/questions/29780060/trying-to-parse-request-body-from-post-in-django
         event_data = json.loads(request.body.decode('utf-8'))
     except ValueError as e:  # https://stackoverflow.com/questions/4097461/python-valueerror-error-message
-        with open(DEBUG_FILE, 'a') as f:
-            print('\nValueError: '+str(e), file=f)
+        debug_msg('\nValueError: '+str(e))
         return HttpResponse('')
-    with open(DEBUG_FILE, 'a') as f:
-        print('\n'+str_time+'\nevent_data: '+str(event_data), file=f)
+    debug_msg('\nevent_data: '+str(event_data))
     # Echo the URL verification challenge code
     if 'challenge' in event_data:
         return render_json_response(request, {
@@ -55,32 +56,27 @@ def slack_events(request, *args, **kwargs):  # cf. https://api.slack.com/events/
             message = 'Request contains invalid Slack verification token: %s\n' \
                       'Slack adapter has: %s' % (request_token, SLACK_VERIFICATION_TOKEN)
             raise PermissionDenied(message)
+            debug_msg('\n'+message)
         event_type = event_data['event']['type']
-        with open(DEBUG_FILE, 'a') as f:
-            print('\n'+str_time+' dispatched to slack_events_adapter.', file=f)
+        debug_msg(' dispatched to slack_events_adapter.')
         slack_events_adapter.emit(event_type, event_data)
         return HttpResponse('')
     # default case
     return HttpResponse('')
 
 def debug_cat(request):
-    time = datetime.datetime.now()
-    str_time = time.strftime('%Y/%m/%d %H:%M:%S')
-    message = str_time+' /debug_cat called.\n'
+    message = '/debug_cat called.\n'
     file = DEBUG_FILE
     if 'path' in request.GET:
         file = request.GET.get('path')
     if os.path.isfile(file):
         with open(file, 'r') as f:
             message += '\n\n' + file + ' contents:\n' + f.read()
-    with open(DEBUG_FILE, 'a') as f:
-        print('\n/debug_cat result:\n' + message, file=f)
+    debug_msg('/debug_cat result:\n' + message)
     return HttpResponse('<pre>' + message + '</pre>')
 
 def debug_ls(request):
-    time = datetime.datetime.now()
-    str_time = time.strftime('%Y/%m/%d %H:%M:%S')
-    message = str_time + ' /debug_ls called.\n'
+    message = '/debug_ls called.\n'
     message += 'current dir: ' + os.getcwd() + '\n'
     cmd = 'ls -al'
     if 'path' in request.GET:
@@ -89,14 +85,11 @@ def debug_ls(request):
     std_out, std_err = proc.communicate()
     ls_file_name = std_out.decode('utf-8').rstrip()
     message += cmd +' result: ' + '\n' + ls_file_name
-    with open(DEBUG_FILE, 'a') as f:
-        print('\n/debug_ls result:\n' + message, file=f)
+    debug_msg('/debug_ls result:\n' + message)
     return HttpResponse('<pre>' + message + '</pre>')
 
 def debug_cmd(request):
-    time = datetime.datetime.now()
-    str_time = time.strftime('%Y/%m/%d %H:%M:%S')
-    message = str_time + ' /debug_cmd called.\n'
+    message = '/debug_cmd called.\n'
     cmd = 'echo "debug_cmd called. cmd and params are missing."'
     if 'cmd' in request.GET:
         cmd = request.GET.get('cmd')
@@ -113,6 +106,5 @@ def debug_cmd(request):
     proc = sp.Popen(cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
     std_out, std_err = proc.communicate()
     message += cmd + ' result: \n  ' + cmd + ' std_out:\n' + std_out.decode('utf-8').rstrip() + '\n  ' + cmd + ' std_err:\n' + std_err.decode('utf-8').rstrip() + '\n'
-    with open(DEBUG_FILE, 'a') as f:
-        print('\n/debug_ls result:\n' + message, file=f)
+    debug_msg('/debug_cmd result:\n' + message)
     return HttpResponse('<pre>' + message + '</pre>')
