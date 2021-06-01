@@ -99,5 +99,5 @@ def reaction_added(event_data):
     if proc_trans_std_err != '':
         debug_msg(trans_cmd+' std_err: '+proc_trans_std_err)
         return HttpResponse('')
-    debug_msg(response to reaction_added event '+trans_cmd+': '+tgt_message)
+    debug_msg('response to reaction_added event '+trans_cmd+': '+tgt_message)
     CLIENT.api_call(api_method='chat.postMessage', json={'channel': channel, 'thread_ts': ts, 'text': tgt_message})
