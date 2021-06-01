@@ -71,7 +71,7 @@ def reaction_added(event_data):
     if os.path.isfile(RESPONCE_FILE):
         with open(RESPONCE_FILE, 'r') as f:
             lines = f.readlines()
-            if event_id in lines:
+            if event_id+'\n' in lines:
                 debug_msg('event already handled: '+event_id)
                 return HttpResponse('')
     with open(RESPONCE_FILE, 'a') as f:
