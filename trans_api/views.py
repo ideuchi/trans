@@ -31,7 +31,7 @@ def slack_events(request, *args, **kwargs):  # cf. https://api.slack.com/events/
     with open(DEBUG_FILE, 'a') as f:
         print('\n'+str_time+' /slack_events called.\n', file=f)
     if request.method == 'GET':
-        raise Http404('These are not the slackbots you're looking for.')
+        raise Http404("These are not the slackbots you're looking for.")
     try:
         # https://stackoverflow.com/questions/29780060/trying-to-parse-request-body-from-post-in-django
         event_data = json.loads(request.body.decode('utf-8'))
