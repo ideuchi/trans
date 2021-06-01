@@ -57,6 +57,10 @@ def reaction_added(event_data):
     tgt_lang = ''
     if is_lang_code(emoji):
         tgt_lang = emoji
+        time = datetime.datetime.now()
+        str_time = time.strftime('%Y/%m/%d %H:%M:%S')
+        with open(DEBUG_FILE, 'a') as f:
+            print('\n'+str_time+' emoji is in lang_list: '+emoji+'\n', file=f)
     else:
         time = datetime.datetime.now()
         str_time = time.strftime('%Y/%m/%d %H:%M:%S')
