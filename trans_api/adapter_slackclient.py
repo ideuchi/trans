@@ -27,7 +27,7 @@ def debug_msg(str):
 RESPONCE_FILE = 'response.txt'
 
 langs = ['ar', 'de', 'en', 'es', 'fp', 'fr', 'id', 'it', 'ja', 'ko', 'my', 'pt', 'pt-BR', 'ru', 'th', 'vi', 'zh-CN', 'zh-TW']
-lang_pairs = ['ar_en', 'de_en', 'de_ja', 'en_ar', 'en_de', 'en_es', 'en_fr', 'en_id', 'en_it', 'en_ja', 'en_ko', 'en_my', 'en_pt', 'en_ru''en_vi', 'en_zh-TW', 'en_th', 'en_zh-CN', 'es_en', 'es_ja', 'fr_en', 'fr_ja', 'id_en', 'id_ja', 'it_en', 'ja_de', 'ja_es', 'ja_en', 'ja_fr', 'ja_id', 'ja_ko', 'ja_my', 'ja_pt', 'ja_th', 'ja_vi', 'ja_zh-CN', 'ja_zh-TW', 'ko_en', 'ko_ja', 'my_en', 'my_ja', 'pt_en', 'pt_ja', 'ru_en', 'th_en', 'th_ja', 'vi_en', 'vi_ja', 'zh-CN_en', 'zh-CN_ja', 'zh-TW_en', 'zh-TW_ja', ]
+lang_pairs = ['ar_en', 'de_en', 'de_ja', 'en_ar', 'en_de', 'en_es', 'en_fr', 'en_id', 'en_it', 'en_ja', 'en_ko', 'en_my', 'en_pt', 'en_ru', 'en_vi', 'en_zh-TW', 'en_th', 'en_zh-CN', 'es_en', 'es_ja', 'fr_en', 'fr_ja', 'id_en', 'id_ja', 'it_en', 'ja_de', 'ja_es', 'ja_en', 'ja_fr', 'ja_id', 'ja_ko', 'ja_my', 'ja_pt', 'ja_th', 'ja_vi', 'ja_zh-CN', 'ja_zh-TW', 'ko_en', 'ko_ja', 'my_en', 'my_ja', 'pt_en', 'pt_ja', 'ru_en', 'th_en', 'th_ja', 'vi_en', 'vi_ja', 'zh-CN_en', 'zh-CN_ja', 'zh-TW_en', 'zh-TW_ja', ]
 slack_flag_langs = {
     # Extracted contry-lang pairs that has available lang from https://github.com/slackapi/reacjilator/blob/master/langcode.js
     'ae':'ar','bh':'ar','dz':'ar','eg':'ar','eh':'ar','iq':'ar','jo':'ar','kw':'ar','lb':'ar','ly':'ar','ma':'ar','mr':'ar','om':'ar','ps':'ar','qa':'ar','sa':'ar','sd':'ar','sw':'ar','tn':'ar','ye':'ar',
