@@ -31,8 +31,7 @@ def render_json_response(request, data, status=None, support_jsonp=False):
 
 @csrf_exempt
 def slack_events(request, *args, **kwargs):  # cf. https://api.slack.com/events/url_verification
-    with open(DEBUG_FILE, 'a') as f:
-        print('\n'+str_time+' /slack_events called.\n', file=f)
+    debug_msg('\n/slack_events called.')
     if request.method == 'GET':
         raise Http404("These are not the slackbots you're looking for.")
     try:
