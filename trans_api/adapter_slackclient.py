@@ -91,7 +91,7 @@ def reaction_added(event_data):
         time = datetime.datetime.now()
         str_time = time.strftime('%Y/%m/%d %H:%M:%S')
         with open(DEBUG_FILE, 'a') as f:
-            print('\n'+str_time+' trans pairs not found: '+src_lang'+' to '+tgt_lang+'\n', file=f)
+            print('\n'+str_time+' trans pairs not found: '+src_lang+' to '+tgt_lang+'\n', file=f)
         return HttpResponse('')
     else:
         for i, pair in enumerate(trans_pairs):
