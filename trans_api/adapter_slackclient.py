@@ -68,7 +68,7 @@ def reaction_added(event_data):
             print('\n'+str_time+' emoji is not in lang_list: '+emoji+'\n', file=f)
         return HttpResponse('')
     # If same event is already received, ignore event
-    with open(RESPONCE_FILE, 'ar') as f:
+    with open(RESPONCE_FILE, 'a+') as f:
         time = datetime.datetime.now()
         str_time = time.strftime('%Y/%m/%d %H:%M:%S')
         if event_id in f.read():
