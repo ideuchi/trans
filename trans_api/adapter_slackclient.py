@@ -52,7 +52,11 @@ def reaction_added(event_data):
         emoji = 'zh-CN'
     if emoji == 'flag-tw':
         emoji = 'zh-TW'
-    tgt_lang = emoji if is_lang_code(emoji) else return HttpResponse('')
+    tgt_lang = ''
+    if is_lang_code(emoji):
+        tgt_lang = emoji
+    else:
+        return HttpResponse('')
     # If same event is already received, ignore event
     with open(RESPONCE_FILE, 'ar') as f:
         if event_id in f.read():
