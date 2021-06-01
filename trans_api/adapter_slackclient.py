@@ -1,6 +1,7 @@
 from django.conf import settings
 import os
 import datetime
+import subprocess as sp
 
 SLACK_VERIFICATION_TOKEN = os.environ.get('SLACK_VERIFICATION_TOKEN','')
 SLACK_BOT_TOKEN = os.environ.get('SLACK_BOT_TOKEN','')
@@ -80,7 +81,7 @@ def reaction_added(event_data):
     debug_msg('lang_detect cmd: '+lang_detect_cmd)
     proc_lang_detect = sp.Popen(lang_detect_cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
     src_lang, proc_lang_std_err = proc_lang_detect.communicate()
-    debug_msg('trans lang_detect src_lang: '+src_lang)
+    debug_msg('lang_detect src_lang: '+src_lang)
     if proc_lang_std_err != '':
         debug_msg('trans lang_detect std_err: '+proc_lang_std_err)
         return HttpResponse('')
