@@ -67,15 +67,15 @@ def reaction_added(event_data):
     else:
         debug_msg('emoji is not in lang_list: '+emoji)
         return HttpResponse('')
-    # If same event is already received, ignore event
-    with open(RESPONCE_FILE, 'a+') as f:
+    # If same event is already received, ignore event (Slack sends same event in about 2 to 3 sec)
+    with open(RESPONCE_FILE, 'r') as f:
         lines = f.readlines()
         if event_id in lines:
             debug_msg('event already handled: '+event_id)
             return HttpResponse('')
-        else:
-            debug_msg('new event to handle: '+event_id)
-            print(event_id, file=f)
+    with open(RESPONCE_FILE, 'a') as f:
+        debug_msg('new event to handle: '+event_id)
+        print(event_id, file=f)
     # Get original message
     message_history = CLIENT.conversations_history(channel=channel, inclusive=True, oldest=ts, limit=1)
     src_message = message_history['messages'][0]['text']
