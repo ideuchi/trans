@@ -72,7 +72,7 @@ def reaction_added(event_data):
         else:
             debug_msg('new event to handle: '+event_id)
     # Get original message
-    message_history = CLIENT.api_call(api_method='conversations.history', json={'channel': channel, 'inclusive': True, 'oldest': ts, 'limit': 1})
+    message_history = CLIENT.conversations_history(channel=channel, inclusive=True, oldest=ts, limit=1)
     debug_msg('message history: '+str(message_history))
     src_message = message_history['messages'][0]['text']
     debug_msg('src message: '+src_message)
