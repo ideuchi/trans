@@ -68,11 +68,12 @@ def reaction_added(event_data):
         debug_msg('emoji is not in lang_list: '+emoji)
         return HttpResponse('')
     # If same event is already received, ignore event (Slack sends same event in about 2 to 3 sec)
-    with open(RESPONCE_FILE, 'r') as f:
-        lines = f.readlines()
-        if event_id in lines:
-            debug_msg('event already handled: '+event_id)
-            return HttpResponse('')
+    if os.path.isfile(RESPONCE_FILE):
+        with open(RESPONCE_FILE, 'r') as f:
+            lines = f.readlines()
+            if event_id in lines:
+                debug_msg('event already handled: '+event_id)
+                return HttpResponse('')
     with open(RESPONCE_FILE, 'a') as f:
         debug_msg('new event to handle: '+event_id)
         print(event_id, file=f)
