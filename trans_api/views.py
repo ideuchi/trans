@@ -40,7 +40,7 @@ def slack_events(request, *args, **kwargs):  # cf. https://api.slack.com/events/
             print('\nValueError: '+str(e), file=f)
         return HttpResponse('')
     with open(DEBUG_FILE, 'a') as f:
-        print('\nevent_data: '+str(event_data), file=f)
+        print('\n'+str_time+'\nevent_data: '+str(event_data), file=f)
     # Echo the URL verification challenge code
     if 'challenge' in event_data:
         return render_json_response(request, {
@@ -56,6 +56,8 @@ def slack_events(request, *args, **kwargs):  # cf. https://api.slack.com/events/
                       'Slack adapter has: %s' % (request_token, SLACK_VERIFICATION_TOKEN)
             raise PermissionDenied(message)
         event_type = event_data['event']['type']
+        with open(DEBUG_FILE, 'a') as f:
+            print('\n'+str_time+' dispatched to slack_events_adapter.', file=f)
         slack_events_adapter.emit(event_type, event_data)
         return HttpResponse('')
     # default case
