@@ -116,7 +116,7 @@ def reaction_added(event_data):
             if i == 0:
                 trans_cmd = './trans text "'+src_message+'" generalNT '+src_lang+' '+tgt_lang
             else:
-                trans_cmd = ' | ./trans text "" generalNT '+src_lang+' '+tgt_lang
+                trans_cmd += ' | ./trans text "" generalNT '+src_lang+' '+tgt_lang
     proc_trans = sp.Popen(trans_cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
     proc_trans_std_out, proc_trans_std_err = proc_trans.communicate()
     tgt_message = proc_trans_std_out.decode('utf-8').rstrip()
