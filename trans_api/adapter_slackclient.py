@@ -67,7 +67,8 @@ def reaction_added(event_data):
         return HttpResponse('')
     # If same event is already received, ignore event
     with open(RESPONCE_FILE, 'a+') as f:
-        if event_id in f.read():
+        lines = f.readlines()
+        if event_id in lines:
             debug_msg('event already handled: '+event_id)
             return HttpResponse('')
         else:
@@ -81,9 +82,9 @@ def reaction_added(event_data):
     debug_msg('lang_detect cmd: '+lang_detect_cmd)
     proc_lang_detect = sp.Popen(lang_detect_cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
     src_lang, proc_lang_std_err = proc_lang_detect.communicate()
-    debug_msg('lang_detect src_lang: '+src_lang)
-    if proc_lang_std_err != '':
-        debug_msg('trans lang_detect std_err: '+proc_lang_std_err)
+    debug_msg('lang_detect src_lang: '+src_lang.decode('utf-8').rstrip())
+    if proc_lang_std_err.decode('utf-8').rstrip() != '':
+        debug_msg('trans lang_detect std_err: '+proc_lang_std_err.decode('utf-8').rstrip())
         return HttpResponse('')
     # Translate message
     trans_pairs = get_trans_pairs(src_lang, tgt_lang)
@@ -100,8 +101,8 @@ def reaction_added(event_data):
                 trans_cmd = ' | ./trans text "" generalNT '+src_lang+' '+tgt_lang
     proc_trans = sp.Popen(trans_cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
     tgt_message, proc_trans_std_err = proc_lang_detect.communicate()
-    if proc_trans_std_err != '':
-        debug_msg(trans_cmd+' std_err: '+proc_trans_std_err)
+    if proc_trans_std_err.decode('utf-8').rstrip() != '':
+        debug_msg(trans_cmd+' std_err: '+proc_trans_std_err.decode('utf-8').rstrip())
         return HttpResponse('')
-    debug_msg('response to reaction_added event '+trans_cmd+': '+tgt_message)
-    CLIENT.api_call(api_method='chat.postMessage', json={'channel': channel, 'thread_ts': ts, 'text': tgt_message})
+    debug_msg('response to reaction_added event '+trans_cmd+': '+tgt_message.decode('utf-8').rstrip())
+    CLIENT.api_call(api_method='chat.postMessage', json={'channel': channel, 'thread_ts': ts, 'text': tgt_message.decode('utf-8').rstrip()})
