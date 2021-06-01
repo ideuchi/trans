@@ -52,6 +52,8 @@ def reaction_added(event_data):
     ts = event['item']['ts']
     debug_msg('starting handle reaction_added event.')
     # Get target language code from emoji (If emoji is not language code, ignore event)
+    if emoji == 'jp':
+        emoji = 'ja'
     if emoji == 'us':
         emoji = 'en'
     if emoji == 'cn':
@@ -78,7 +80,7 @@ def reaction_added(event_data):
     message_history = CLIENT.conversations_history(channel=channel, inclusive=True, oldest=ts, limit=1)
     src_message = message_history['messages'][0]['text']
     debug_msg('src message: '+src_message)
-    lang_detect_cmd = './trans lang_detect '+src_message
+    lang_detect_cmd = './trans lang_detect "'+src_message+'"'
     debug_msg('lang_detect cmd: '+lang_detect_cmd)
     proc_lang_detect = sp.Popen(lang_detect_cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
     src_lang, proc_lang_std_err = proc_lang_detect.communicate()
