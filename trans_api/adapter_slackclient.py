@@ -89,7 +89,7 @@ def reaction_added(event_data):
         debug_msg('trans lang_detect std_err: '+proc_lang_std_err.decode('utf-8').rstrip())
         return HttpResponse('')
     # Translate message
-    debug_msg('call get_trans_pairs()')
+    debug_msg('call get_trans_pairs('+src_lang+', '+tgt_lang+')')
     trans_pairs = get_trans_pairs(src_lang, tgt_lang)
     debug_msg('get_trans_pairs() result: '+str(trans_pairs))
     trans_cmd = ''
