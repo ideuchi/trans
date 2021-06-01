@@ -36,18 +36,19 @@ def get_trans_pairs(lang1, lang2):
         return []
 
 # reaction for emoji
-@slack_events_adapter.on('reaction_added')
 def reaction_added(event_data):
     event_id = event_data['event_id']
     event = event_data['event']
     emoji = event['reaction']
     channel = event['item']['channel']
     ts = event['item']['ts']
-    time = datetime.datetime.now()
-    str_time = time.strftime('%Y/%m/%d %H:%M:%S')
     with open(DEBUG_FILE, 'a') as f:
+        time = datetime.datetime.now()
+        str_time = time.strftime('%Y/%m/%d %H:%M:%S')
         print('\n'+str_time+' starting handle reaction_added event\n', file=f)
     # Get target language code from emoji (If emoji is not language code, ignore event)
+    if emoji == 'us':
+        emoji = 'en'
     if emoji == 'cn':
         emoji = 'zh-CN'
     if emoji == 'flag-tw':
@@ -56,12 +57,22 @@ def reaction_added(event_data):
     if is_lang_code(emoji):
         tgt_lang = emoji
     else:
+        time = datetime.datetime.now()
+        str_time = time.strftime('%Y/%m/%d %H:%M:%S')
+        with open(DEBUG_FILE, 'a') as f:
+            print('\n'+str_time+' emoji is not in lang_list: '+emoji+'\n', file=f)
         return HttpResponse('')
     # If same event is already received, ignore event
     with open(RESPONCE_FILE, 'ar') as f:
+        time = datetime.datetime.now()
+        str_time = time.strftime('%Y/%m/%d %H:%M:%S')
         if event_id in f.read():
+            with open(DEBUG_FILE, 'a') as f:
+                print('\n'+str_time+' event already handled: '+event_id+'\n', file=f)
             return HttpResponse('')
         else:
+            with open(DEBUG_FILE, 'a') as f:
+                print('\n'+str_time+' new event to handle: '+event_id+'\n', file=f)
             print(event_id+'\n', file=f)
     # Get original message
     src_message = CLIENT.api_call(api_method='conversations.history', json={'channel': channel, 'inclusive': True, 'oldest': ts, 'limit': 1})['messages'][0]['text']
@@ -77,6 +88,10 @@ def reaction_added(event_data):
     trans_pairs = get_trans_pairs(src_lang, tgt_lang)
     trans_cmd = ''
     if len(trans_pairs) == 0:    # There's no translation pair
+        time = datetime.datetime.now()
+        str_time = time.strftime('%Y/%m/%d %H:%M:%S')
+        with open(DEBUG_FILE, 'a') as f:
+            print('\n'+str_time+' trans pairs not found: '+src_lang'+' to '+tgt_lang+'\n', file=f)
         return HttpResponse('')
     else:
         for i, pair in enumerate(trans_pairs):
@@ -91,8 +106,8 @@ def reaction_added(event_data):
     str_time = time.strftime('%Y/%m/%d %H:%M:%S')
     if proc_trans_std_err != '':
         with open(DEBUG_FILE, 'a') as f:
-            print('\n'+str_time+' trans std_err: '+proc_trans_std_err+'.\n', file=f)
+            print('\n'+str_time+' '+trans_cmd+' std_err: '+proc_trans_std_err+'.\n', file=f)
         return HttpResponse('')
     with open(DEBUG_FILE, 'a') as f:
-        print('\n'+str_time+' response to reaction_added event: '+tgt_message+'.\n', file=f)
+        print('\n'+str_time+' response to reaction_added event '+trans_cmd+': '+tgt_message+'.\n', file=f)
     CLIENT.api_call(api_method='chat.postMessage', json={'channel': channel, 'thread_ts': ts, 'text': tgt_message})
