@@ -123,7 +123,7 @@ try:
   if KIND == 'lang_detect':
     d = json.loads(res.text)
     for n in range(len(d['resultset']['result']['langdetect'])):
-      TGT = TGT + d['resultset']['result']['langdetect']['1']['lang'] + '\n'
+      TGT = TGT + d['resultset']['result']['langdetect']['1']['lang']
   print(TGT)
 except Exception as e:
   print('=== Error ===')

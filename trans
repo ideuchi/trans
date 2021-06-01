@@ -14,7 +14,7 @@ interval=3                      # interval (seconds) for confirming status of fi
 
 ## Set API information (if engine, src_lang, tgt_lang are defined in APIinfo.ini, command line options are overwritten)
 trans_dir=$(cd $(dirname $0); pwd)
-. ${trans_dir}/APIinfo.ini     # set API information (name, key, secret) and request tool (sh/py)
+. "${trans_dir}/APIinfo.ini"    # set API information (name, key, secret) and request tool (sh/py)
 
 ## Get stdin if executed in pipe (if stdin exists, source text from command line option is overwritten)
 if [ -p /dev/stdin ]; then src=`cat -`; fi
@@ -22,7 +22,7 @@ if [ -p /dev/stdin ]; then src=`cat -`; fi
 
 ## Explanation of I/F
 if [ "${src}" == "" ] ; then
-  echo "Usege: trans [kind] 'source text' [engine] [source language] [target language]"
+  echo "Usage: trans [kind] 'source text' [engine] [source language] [target language]"
   echo "       [kind] can be selected from 'text' 'file' 'dir'"
   echo "       [engine], [source language], [target language] can be selected from engine list and language list in APIinfo.ini"
   exit 1
@@ -40,7 +40,7 @@ api_request() {
   declare -n parameters_ref=${2}
   request_file=${3}
   
-  # concatenate all parameters
+  # Concatenate all parameters
   additional_parameters=""
   request_secret=""
   for refkey in "${!parameters_ref[@]}"; do
@@ -66,7 +66,7 @@ api_request() {
   signing_key="${request_secret}&"
   oauth_signature="$(echo -n "${signature_base_string}" | openssl dgst -sha1 -binary -hmac "${signing_key}" | base64 | curl -Gso /dev/null -w %{url_effective} --data-urlencode @- "" | sed -E 's/..(.*).../\1/')"
   
-  # assemble curl request commands
+  # Assemble curl request commands
   request_url_parameters=`echo ${additional_parameters} | sed -e 's/\\\\n/\&/g'`
   if [ "${request_file}" == "" ] ; then
     # text translation API accepts parameters with 'curl -d' option
@@ -99,7 +99,7 @@ text_sh() {
   # URL encode for source text
   text=$(echo -en "${text_src}" | curl -Gso /dev/null -w %{url_effective} --data-urlencode @- "" | cut -c 3-)
   
-  # prepare parameters for api_request
+  # Prepare parameters for api_request
   declare -A parameters
   parameters["name"]=${name}
   parameters["key"]=${key}
@@ -121,10 +121,10 @@ file_set_sh() {
   file_set_src=${1}
   mt_id="${engine}_${src_lang}_${tgt_lang}"
   
-  # source data preparation
+  # Source data preparation
   file=@${file_set_src}
   
-  # prepare parameters for api_request
+  # Prepare parameters for api_request
   declare -A parameters
   parameters["name"]=${name}
   parameters["key"]=${key}
@@ -147,7 +147,7 @@ file_status_sh() {
   url=https://mt-auto-minhon-mlt.ucri.jgn-x.jp/api/trans_file/status/
   status_pid=${1}
   
-  # prepare parameters for api_request
+  # Prepare parameters for api_request
   declare -A parameters
   parameters["name"]=${name}
   parameters["key"]=${key}
@@ -169,7 +169,7 @@ file_get_sh() {
   get_pid=${1}
   get_file=${2}
   
-  # prepare parameters for api_request
+  # Prepare parameters for api_request
   declare -A parameters
   parameters["name"]=${name}
   parameters["key"]=${key}
@@ -191,7 +191,7 @@ function file_trans(){
   file_src=${1}
   file_tgt=${2}
   
-  # if target file name is not specified, add target language name to source file name
+  # If target file name is not specified, add target language name to source file name
   if [ "${file_tgt}" == "" ]; then
     file_tgt="${file_src%.*}_${tgt_lang}.${file_src##*.}"
   fi
@@ -244,14 +244,14 @@ function dir_trans(){
     IFS=$'\n'
     for line in `ls -a` ; do
       local child=${line}
-      # skip special files start with "." , ".."
+      # Skip special files start with "." , ".."
       if [[ "${child}" =~ ^(.|..)$ ]]; then continue; fi
       if [ -d "${child}" ]; then
         mkdir -p "${tgt_dir}/${child}"
         dir_trans "${src_dir}/${child}" "${tgt_dir}/${child}" ${command}
       else
         local ext=.${child##*.}
-        # execute translation with listed extensions
+        # Execute translation with listed extensions
         case ${ext} in
           *.txt)  ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
           *.html) ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
@@ -286,14 +286,13 @@ function dir_trans(){
 # This function receives parameters below, call this function with these parameters
 # ${text_src}    ## ${text_src} is a string to detect language
 function lang_detect_sh(){
-  # Make request URL
   url=https://mt-auto-minhon-mlt.ucri.jgn-x.jp/api/langdetect/
   text_src=${1}
   
   # URL encode for source text
   text=$(echo -en "${text_src}" | curl -Gso /dev/null -w %{url_effective} --data-urlencode @- "" | cut -c 3-)
   
-  # prepare parameters for api_request
+  # Prepare parameters for api_request
   declare -A parameters
   parameters["name"]=${name}
   parameters["key"]=${key}
@@ -308,6 +307,11 @@ function lang_detect_sh(){
 
 ## Main procedure
 if [ "${kind}" == "text" ]; then
+  # If ${src_lang} is "auto", call lang_detect
+  if [ "${src_lang}" == "auto" ] ; then
+    src_lang=`"${trans_dir}/trans" lang_detect "${src}"`
+  fi
+  
   if [ "${tool}" == "sh" ]; then
     text_sh "${src}"
   fi

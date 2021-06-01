@@ -14,14 +14,14 @@ DEBUG_FILE = 'debug.txt'
 
 def render_json_response(request, data, status=None, support_jsonp=False):
     json_str = json.dumps(data, ensure_ascii=False, indent=2)
-    callback = request.GET.get("callback")
+    callback = request.GET.get('callback')
     if not callback:
-        callback = request.POST.get("callback")  # in case of POST and JSONP
+        callback = request.POST.get('callback')  # in case of POST and JSONP
     if callback and support_jsonp:
-        json_str = "%s(%s)" % (callback, json_str)
-        response = HttpResponse(json_str, content_type="application/javascript; charset=UTF-8", status=status)
+        json_str = '%s(%s)' % (callback, json_str)
+        response = HttpResponse(json_str, content_type='application/javascript; charset=UTF-8', status=status)
     else:
-        response = HttpResponse(json_str, content_type="application/json; charset=UTF-8", status=status)
+        response = HttpResponse(json_str, content_type='application/json; charset=UTF-8', status=status)
     return response
 
 @csrf_exempt
@@ -30,44 +30,44 @@ def slack_events(request, *args, **kwargs):  # cf. https://api.slack.com/events/
     str_time = time.strftime('%Y/%m/%d %H:%M:%S')
     with open(DEBUG_FILE, 'a') as f:
         print('\n'+str_time+' /slack_events called.\n', file=f)
-    if request.method == "GET":
-        raise Http404("These are not the slackbots you're looking for.")
+    if request.method == 'GET':
+        raise Http404('These are not the slackbots you're looking for.')
     try:
         # https://stackoverflow.com/questions/29780060/trying-to-parse-request-body-from-post-in-django
-        event_data = json.loads(request.body.decode("utf-8"))
+        event_data = json.loads(request.body.decode('utf-8'))
     except ValueError as e:  # https://stackoverflow.com/questions/4097461/python-valueerror-error-message
         with open(DEBUG_FILE, 'a') as f:
             print('\nValueError: '+str(e), file=f)
-        return HttpResponse("")
+        return HttpResponse('')
     with open(DEBUG_FILE, 'a') as f:
         print('\nevent_data: '+str(event_data), file=f)
     # Echo the URL verification challenge code
-    if "challenge" in event_data:
+    if 'challenge' in event_data:
         return render_json_response(request, {
-            "challenge": event_data["challenge"]
+            'challenge': event_data['challenge']
         })
     # Parse the Event payload and emit the event to the event listener
-    if "event" in event_data:
+    if 'event' in event_data:
         # Verify the request token
-        request_token = event_data["token"]
+        request_token = event_data['token']
         if request_token != SLACK_VERIFICATION_TOKEN:
             slack_events_adapter.emit('error', 'invalid verification token')
-            message = "Request contains invalid Slack verification token: %s\n" \
-                      "Slack adapter has: %s" % (request_token, SLACK_VERIFICATION_TOKEN)
+            message = 'Request contains invalid Slack verification token: %s\n' \
+                      'Slack adapter has: %s' % (request_token, SLACK_VERIFICATION_TOKEN)
             raise PermissionDenied(message)
-        event_type = event_data["event"]["type"]
+        event_type = event_data['event']['type']
         slack_events_adapter.emit(event_type, event_data)
-        return HttpResponse("")
+        return HttpResponse('')
     # default case
-    return HttpResponse("")
+    return HttpResponse('')
 
 def debug_cat(request):
     time = datetime.datetime.now()
     str_time = time.strftime('%Y/%m/%d %H:%M:%S')
     message = str_time+' /debug_cat called.\n'
     file = DEBUG_FILE
-    if "path" in request.GET:
-        file = request.GET.get("path")
+    if 'path' in request.GET:
+        file = request.GET.get('path')
     if os.path.isfile(file):
         with open(file, 'r') as f:
             message += '\n\n' + file + ' contents:\n' + f.read()
@@ -81,8 +81,8 @@ def debug_ls(request):
     message = str_time + ' /debug_ls called.\n'
     message += 'current dir: ' + os.getcwd() + '\n'
     cmd = 'ls -al'
-    if "path" in request.GET:
-        cmd += ' ' + request.GET.get("path")
+    if 'path' in request.GET:
+        cmd += ' ' + request.GET.get('path')
     proc= sp.Popen(cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
     std_out, std_err = proc.communicate()
     ls_file_name = std_out.decode('utf-8').rstrip()
@@ -96,19 +96,19 @@ def debug_cmd(request):
     str_time = time.strftime('%Y/%m/%d %H:%M:%S')
     message = str_time + ' /debug_cmd called.\n'
     cmd = 'echo "debug_cmd called. cmd and params are missing."'
-    if "cmd" in request.GET:
-        cmd = request.GET.get("cmd")
-    if "param1" in request.GET:
-        cmd += ' ' + request.GET.get("param1")
-    if "param2" in request.GET:
-        cmd += ' ' + request.GET.get("param2")
-    if "param3" in request.GET:
-        cmd += ' ' + request.GET.get("param3")
-    if "param4" in request.GET:
-        cmd += ' ' + request.GET.get("param4")
-    if "param5" in request.GET:
-        cmd += ' ' + request.GET.get("param5")
-    proc= sp.Popen(cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+    if 'cmd' in request.GET:
+        cmd = request.GET.get('cmd')
+    if 'param1' in request.GET:
+        cmd += ' ' + request.GET.get('param1')
+    if 'param2' in request.GET:
+        cmd += ' ' + request.GET.get('param2')
+    if 'param3' in request.GET:
+        cmd += ' ' + request.GET.get('param3')
+    if 'param4' in request.GET:
+        cmd += ' ' + request.GET.get('param4')
+    if 'param5' in request.GET:
+        cmd += ' ' + request.GET.get('param5')
+    proc = sp.Popen(cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
     std_out, std_err = proc.communicate()
     message += cmd + ' result: \n  ' + cmd + ' std_out:\n' + std_out.decode('utf-8').rstrip() + '\n  ' + cmd + ' std_err:\n' + std_err.decode('utf-8').rstrip() + '\n'
     with open(DEBUG_FILE, 'a') as f:
