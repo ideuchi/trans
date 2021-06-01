@@ -83,8 +83,9 @@ def reaction_added(event_data):
     lang_detect_cmd = './trans lang_detect "'+src_message+'"'
     debug_msg('lang_detect cmd: '+lang_detect_cmd)
     proc_lang_detect = sp.Popen(lang_detect_cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
-    src_lang, proc_lang_std_err = proc_lang_detect.communicate()
-    debug_msg('lang_detect src_lang: '+src_lang.decode('utf-8').rstrip())
+    proc_lang_std_out, proc_lang_std_err = proc_lang_detect.communicate()
+    src_lang = proc_lang_std_out.decode('utf-8').rstrip()
+    debug_msg('lang_detect src_lang: '+src_lang)
     if proc_lang_std_err.decode('utf-8').rstrip() != '':
         debug_msg('trans lang_detect std_err: '+proc_lang_std_err.decode('utf-8').rstrip())
         return HttpResponse('')
@@ -104,9 +105,10 @@ def reaction_added(event_data):
             else:
                 trans_cmd = ' | ./trans text "" generalNT '+src_lang+' '+tgt_lang
     proc_trans = sp.Popen(trans_cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
-    tgt_message, proc_trans_std_err = proc_lang_detect.communicate()
+    proc_trans_std_out, proc_trans_std_err = proc_lang_detect.communicate()
+    tgt_message = proc_trans_std_out.decode('utf-8').rstrip()
     if proc_trans_std_err.decode('utf-8').rstrip() != '':
         debug_msg(trans_cmd+' std_err: '+proc_trans_std_err.decode('utf-8').rstrip())
         return HttpResponse('')
-    debug_msg('response to reaction_added event '+trans_cmd+': '+tgt_message.decode('utf-8').rstrip())
-    CLIENT.api_call(api_method='chat.postMessage', json={'channel': channel, 'thread_ts': ts, 'text': tgt_message.decode('utf-8').rstrip()})
+    debug_msg('response to reaction_added event:\n  cmd: '+trans_cmd+'\n  res: '+tgt_message)
+    CLIENT.api_call(api_method='chat.postMessage', json={'channel': channel, 'thread_ts': ts, 'text': tgt_message})
