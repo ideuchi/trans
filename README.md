@@ -199,6 +199,8 @@ Slackアプリ（のボットユーザー）を追加したチャンネルに、
 あまり時間を空けるとログは消えてしまうので注意してください。  
 
 ログを確認する場合、処理の流れは以下のようになっています。  
+
+~~~~
 処理のログ例（"Hello."を"こんにちは。"に翻訳する例）：
 a. "starting handle reaction_added event."（reaction_addedイベントを受信した旨を記録）  
 b. "emoji is one of target lang: emoji = jp, lang = ja"（絵文字の種類から翻訳処理対象かどうかを判定、この例では日本語への翻訳）  
@@ -211,13 +213,14 @@ h. "get_trans_pairs() result: ['it_en', 'en_ja']"（翻訳パスの結果を記�
 i. "response to reaction_added event:  
     cmd: ./trans text "Hello." generalNT it en | ./trans text "" generalNT en ja  
     res: こんにちは。"（呼び出した翻訳支援コマンドと、翻訳結果を記録。）
+~~~~
 
 
-Slackアプリ作成時に参考にしたURL：  
-https://github.com/slackapi/reacjilator  
-https://github.com/j-devel/django-slack-events-api  
-https://qiita.com/kimihiro_n/items/86e0a9e619720e57ecd8  
-https://www.sejuku.net/blog/9014  
+### Slackアプリ作成時の参考にさせていただいたURL：  
+- https://github.com/slackapi/reacjilator
+- https://github.com/j-devel/django-slack-events-api
+- https://qiita.com/kimihiro_n/items/86e0a9e619720e57ecd8
+- https://www.sejuku.net/blog/9014
 
 
 ## 留意事項(Notice)
