@@ -128,6 +128,98 @@ translating "/path/to/sample_dir/xxxxxxx" to "/path/to/sample_dir_en/xxxxxxx"
 ```
 
 
+## 応用例：Slackメッセージの翻訳
+
+以下の手順で、翻訳支援コマンドツール(trans)を利用してSlackに投稿されたメッセージを翻訳するSlackアプリを作成できます。  
+Slackアプリ作成に必要なファイルも本リポジトリに入れてあります。  
+
+1. 連携先のSlackワークスペースにログインします。  
+ログイン後、 https://api.slack.com/apps にアクセスして、"Create New App"をクリックします。  
+"From scratch / From an app manifest"と表示された場合は、"From scratch"を選択します。  
+出てくる画面に、Slackアプリの名前を入力し、デプロイ先のSlackワークスペースを選択します。  
+
+2. 1.の後に表示されるアプリの設定画面で、"Add features and functionality"をの設定項目から、"Permissions"をクリックします。  
+"Scopes"の"Bot Token Scopes"に、以下を一つずつ追加していきます。  
+（一度、画面を閉じてしまった場合は、 https://api.slack.com/apps にアクセスして、1.で作成したSlackアプリ名をクリックすると設定画面が開きます。）  
+- reactions:read
+- chat:write:public（これを追加すると、同時にchat:writeも追加されます）
+- channels:read
+- channels:history
+- groups:history
+- im:history
+- mpim:history
+
+3. Slackアプリの設定画面の左側メニュー"Settings"カテゴリにある"Install App"をクリックします。  
+表示された画面で、"Install to Workspace"をクリックすると、ワークスペースの画面に遷移し1.で作成したSlackアプリが連携先のSlackワークスペースにアクセスする権限をリクエストしている旨を伝える画面が開きます。  
+「許可する」をクリックします。  
+
+4. 3.を終えると、Slackアプリの設定画面に戻り、"OAuth Tokens for Your Workspace"の画面が表示されます。  
+この画面で、"Bot User OAuth Token"として表示された"xoxb-12345..."といった文字列を控えておきます。  
+（ここで"Bot User OAuth Token"で表示された文字列を控え忘れた場合は、Slackアプリ設定画面の左側メニュー"Features"カテゴリにある"OAuth & Permissions"から参照できます。）  
+
+5. Slackアプリの設定画面の左側メニュー"Settings"カテゴリにある"Basic Information"をクリックします。  
+"App Credentials"の"Verification Token"に表示された値を控えておきます。  
+（ここまでの手順で、2.で指定した権限を持ち、Slackワークスペースを操作できるSlackアプリが作成できました。実際の操作はSlack APIを経由して、6.でデプロイするHerokuアプリから行います。）
+
+6. 本レポジトリの内容を、Herokuにデプロイします。（デプロイボタン準備中）  
+Herokuのアプリ名を控えておきます。
+gitコマンドとherokuコマンドを使う場合は、以下のようにコマンドを実行します。  
+```sh
+git clone https://github.com/ideuchi/trans
+cd trans
+heroku login   # login from browser
+heroku create  # heroku app name is displayed by this command, https://[heroku_app_name].herokuapp.com/
+git push heroku main
+
+# replace string of [] by your own
+heroku config:set NAME=[TexTra_user_name]
+heroku config:set KEY=[TexTra_key]
+heroku config:set SECRET=[TexTra_secret]
+heroku config:set SLACK_BOT_TOKEN=[Slack_Bot_User_OAuth_Token in 4.]
+heroku config:set SLACK_VERIFICATION_TOKEN=[Slack_Verification_Token in 5.]
+```
+（ここまでの手順で、Slackワークスペースを操作する仕組みはできましたが、操作のきっかけとなるイベントをHerokuアプリに通知する設定が必要です。）
+
+7. 連携先のSlackワークスペースにログインします。  
+https://api.slack.com/apps にアクセスして、Slackアプリの設定画面を開き、"Add features and functionality"から、"Event Subscriptions"をクリックします。  
+"Enable Events"をOnにして"Request URL"にHerokuアプリのURL https://[heroku-app-name].herokuapp.com/slack_events/ を入力します。  
+
+8. "Enable Events"をOnにすると出てくる"Subscribe to bot events"に、"reaction_added"を追加します。  
+画面下部の"Save Changes"をクリックすれば、設定が反映され、指定したイベントがHerokuアプリに通知されるようになります。  
+
+9. 連携先のSlackワークスペースの画面左側の"App"に、1.で指定した名前のSlackアプリが表示されていることを確認してから、Slackアプリ名をクリックします。  
+開いた画面の左上のSlackアプリ名をクリックすると出てくる画面で、"チャンネルにこのアプリを追加する"というボタンをクリックします。  
+チャンネルを選んで、Slackアプリ（のボットユーザー）を追加します。  
+Slackアプリ（のボットユーザー）を追加したチャンネルに、Slackアプリ（のボットユーザー）が追加された旨のメッセージが表示されていれば追加成功です。  
+
+10. 【動作確認】Slackアプリ（のボットユーザー）を追加したチャンネルにメッセージを投稿し、そのメッセージに国旗アイコンのリアクションを追加します。  
+メッセージの返信（スレッド）に、Slackアプリ（のボットユーザー）から翻訳結果が書き込まれれば正常動作しています。  
+
+11. 正常動作していない場合は、ブラウザからHerokuアプリのURL https://[heroku-app-name].herokuapp.com/debug_cat/ にアクセスすると、ログが参照できます。  
+あまり時間を空けるとログは消えてしまうので注意してください。  
+
+ログを確認する場合、処理の流れは以下のようになっています。  
+処理のログ例（"Hello."を"こんにちは。"に翻訳する例）：
+a. "starting handle reaction_added event."（reaction_addedイベントを受信した旨を記録）  
+b. "emoji is one of target lang: emoji = jp, lang = ja"（絵文字の種類から翻訳処理対象かどうかを判定、この例では日本語への翻訳）  
+c. "new event to handle: Ev027BNB2U4V"（Slackから複数回イベントが通知されることがあるため、新規イベントか処理中のイベントかを判定）  
+d. "src message: Hello."（翻訳対象文字列を記録）  
+e. "lang_detect cmd: ./trans lang_detect "Hello.""（言語判定コマンドの実行を記録）  
+f. "lang_detect src_lang: it"（翻訳対象文字列の言語判定結果を記録、この例ではイタリア語、短い表現だとたまに間違える）  
+g. "call get_trans_pairs(it, ja)"（翻訳対象文字列から、指定された言語への翻訳パス確認を行った旨を記録、この例ではイタリア語から日本語）  
+h. "get_trans_pairs() result: ['it_en', 'en_ja']"（翻訳パスの結果を記録、この例ではイタリア語→英語、英語→日本語）
+i. "response to reaction_added event:  
+    cmd: ./trans text "Hello." generalNT it en | ./trans text "" generalNT en ja  
+    res: こんにちは。"（呼び出した翻訳支援コマンドと、翻訳結果を記録。）
+
+
+Slackアプリ作成時に参考にしたURL：  
+https://github.com/slackapi/reacjilator  
+https://github.com/j-devel/django-slack-events-api  
+https://qiita.com/kimihiro_n/items/86e0a9e619720e57ecd8  
+https://www.sejuku.net/blog/9014  
+
+
 ## 留意事項(Notice)
 
 本プログラムから、「みんなの自動翻訳@TexTra」のサービスを利用する場合は、ユーザー登録の上、下記の利用規約を守って使ってください。  
