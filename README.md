@@ -216,11 +216,15 @@ i. "response to reaction_added event:
 ~~~~
 
 
-### Slackアプリ作成時の参考にさせていただいたURL：  
-- https://github.com/slackapi/reacjilator
-- https://github.com/j-devel/django-slack-events-api
-- https://qiita.com/kimihiro_n/items/86e0a9e619720e57ecd8
-- https://www.sejuku.net/blog/9014
+### Slackアプリ作成時の参考にさせていただいたサイト・プログラム：  
+- reacjilator (Copyright (c) 2019 Tomomi Imura)  
+https://github.com/slackapi/reacjilator
+- django-slack-events-api (Copyright (c) 2017-present j-devel)  
+https://github.com/j-devel/django-slack-events-api
+- API by Django REST Framework  
+https://qiita.com/kimihiro_n/items/86e0a9e619720e57ecd8
+- About Python django  
+https://www.sejuku.net/blog/9014
 
 
 ## 留意事項(Notice)
