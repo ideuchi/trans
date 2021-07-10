@@ -165,7 +165,7 @@ Slackアプリ作成に必要なファイルも本リポジトリに入れてあ
 Herokuのアプリ名は、後で必要になるので、控えておきます。  
 以下のボタンを押して、必要事項を入力すればデプロイできます。
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)  
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/ideuchi/trans)  
 
 gitコマンドとherokuコマンドを使う場合は、以下のようにコマンドを実行します。  
 ```sh
