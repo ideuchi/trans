@@ -161,8 +161,12 @@ Slackアプリ作成に必要なファイルも本リポジトリに入れてあ
 "App Credentials"の"Verification Token"に表示された値を控えておきます。  
 （ここまでの手順で、2.で指定した権限を持ち、Slackワークスペースを操作できるSlackアプリが作成できました。実際の操作はSlack APIを経由して、6.でデプロイするHerokuアプリから行います。）
 
-6. 本レポジトリの内容を、Herokuにデプロイします。（デプロイボタン準備中）  
-Herokuのアプリ名を控えておきます。
+6. 本レポジトリの内容を、Herokuにデプロイします。  
+Herokuのアプリ名は、後で必要になるので、控えておきます。  
+以下のボタンを押して、必要事項を入力すればデプロイできます。
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)  
+
 gitコマンドとherokuコマンドを使う場合は、以下のようにコマンドを実行します。  
 ```sh
 git clone https://github.com/ideuchi/trans
@@ -178,7 +182,7 @@ heroku config:set SECRET=[TexTra_secret]
 heroku config:set SLACK_BOT_TOKEN=[Slack_Bot_User_OAuth_Token in 4.]
 heroku config:set SLACK_VERIFICATION_TOKEN=[Slack_Verification_Token in 5.]
 ```
-（ここまでの手順で、Slackワークスペースを操作する仕組みはできましたが、操作のきっかけとなるイベントをHerokuアプリに通知する設定が必要です。）
+（ここまでの手順で、Slackワークスペースを操作するHerokuアプリが準備できました。最後に、操作のきっかけとなるSlackのイベントをHerokuアプリに通知する設定が必要です。）
 
 7. 連携先のSlackワークスペースにログインします。  
 https://api.slack.com/apps にアクセスして、Slackアプリの設定画面を開き、"Add features and functionality"から、"Event Subscriptions"をクリックします。  
