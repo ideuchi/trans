@@ -1,0 +1,29 @@
+﻿{
+  "name": "trans Slack Bot demo",
+  "description": "A translation bot for Slack that translates a message when a user reacted with an emoji (The specifications are based on reacjilator: https://github.com/slackAPI/reacjilator)",
+  "repository": "https://github.com/ideuchi/trans",
+  "keywords": ["trans", "slack API", "bot", "TexTra"],
+  "env": {
+    "NAME": {
+      "description": "TexTra user name",
+      "value": "xxxxxxxx"
+    },
+    "KEY": {
+      "description": "TexTra key",
+      "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    },
+    "SECRET": {
+      "description": "TexTra secret",
+      "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    },
+    "SLACK_BOT_TOKEN": {
+      "description": "Slack Bot Token",
+      "value": "xoxb-..."
+    },
+    "SLACK_VERIFICATION_TOKEN": {
+      "description": "Slack Verification Token",
+      "value": "xxxxxxxxxxxxxxxxxxxxxxxx"
+    }
+  },
+  "image": "heroku/python"
+}
