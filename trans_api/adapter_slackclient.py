@@ -27,21 +27,24 @@ def debug_msg(str):
 
 RESPONCE_FILE = 'response.txt'
 
-langs = ['ar', 'de', 'en', 'es', 'fp', 'fr', 'id', 'it', 'ja', 'ko', 'my', 'pt', 'pt-BR', 'ru', 'th', 'vi', 'zh-CN', 'zh-TW']
-lang_pairs = ['ar_en', 'de_en', 'de_ja', 'en_ar', 'en_de', 'en_es', 'en_fr', 'en_id', 'en_it', 'en_ja', 'en_ko', 'en_my', 'en_pt', 'en_ru', 'en_vi', 'en_zh-TW', 'en_th', 'en_zh-CN', 'es_en', 'es_ja', 'fr_en', 'fr_ja', 'id_en', 'id_ja', 'it_en', 'ja_de', 'ja_es', 'ja_en', 'ja_fr', 'ja_id', 'ja_ko', 'ja_my', 'ja_pt', 'ja_th', 'ja_vi', 'ja_zh-CN', 'ja_zh-TW', 'ko_en', 'ko_ja', 'my_en', 'my_ja', 'pt_en', 'pt_ja', 'ru_en', 'th_en', 'th_ja', 'vi_en', 'vi_ja', 'zh-CN_en', 'zh-CN_ja', 'zh-TW_en', 'zh-TW_ja', ]
+langs = ['ar', 'de', 'en', 'es', 'fp', 'fr', 'id', 'it', 'ja', 'ko', 'pt', 'km', 'mn', 'my', 'ne', 'pt-BR', 'ru', 'th', 'vi', 'zh-CN', 'zh-TW']
+lang_pairs = ['ar_en', 'ar_ja', 'de_en', 'de_ja', 'en_ar', 'en_de', 'en_es', 'en_fp', 'en_fr', 'en_id', 'en_it', 'en_ja', 'en_km', 'en_ko', 'en_mn', 'en_my', 'en_ne', 'en_pt', 'en_ru', 'en_th', 'en_vi', 'en_zh-CN', 'en_zh-TW', 'es_en', 'es_ja', 'fp_en', 'fp_ja', 'fr_en', 'fr_ja', 'id_en', 'id_ja', 'it_en', 'it_ja', 'ja_ar', 'ja_de', 'ja_en', 'ja_es', 'ja_fp', 'ja_fr', 'ja_id', 'ja_it', 'ja_km', 'ja_ko', 'ja_mn', 'ja_my', 'ja_ne', 'ja_pt', 'ja_ru', 'ja_th', 'ja_vi', 'ja_zh-CN', 'ja_zh-TW', 'km_en', 'km_ja', 'ko_en', 'ko_ja', 'mn_en', 'mn_ja', 'my_en', 'my_ja', 'ne_en', 'ne_ja', 'pt_en', 'pt_ja', 'ru_en', 'ru_ja', 'th_en', 'th_ja', 'vi_en', 'vi_ja', 'zh-CN_en', 'zh-CN_ja', 'zh-TW_en', 'zh-TW_ja']
 slack_flag_langs = {
     # Extracted contry-lang pairs that has available lang from https://github.com/slackapi/reacjilator/blob/master/langcode.js
     'ae':'ar','bh':'ar','dz':'ar','eg':'ar','eh':'ar','iq':'ar','jo':'ar','kw':'ar','lb':'ar','ly':'ar','ma':'ar','mr':'ar','om':'ar','ps':'ar','qa':'ar','sa':'ar','sd':'ar','sw':'ar','tn':'ar','ye':'ar',
     'at':'de','ch':'de','de':'de','li':'de',
     'ac':'en','ag':'en','ai':'en','as':'en','au':'en','bb':'en','bn':'en','bs':'en','bw':'en','bz':'en','ca':'en','ck':'en','cx':'en','dm':'en','fj':'en','fk':'en','fm':'en','gb':'en','gd':'en','gg':'en','gh':'en','gi':'en','gm':'en','gs':'en','gu':'en','gy':'en','im':'en','io':'en','je':'en','jm':'en','ke':'en','ki':'en','kn':'en','ky':'en','lc':'en','lr':'en','mp':'en','ms':'en','mu':'en','mw':'en','na':'en','nf':'en','ng':'en','nz':'en','pn':'en','pw':'en','sb':'en','sc':'en','sg':'en','sh':'en','sl':'en','ss':'en','ta':'en','tc':'en','tt':'en','ug':'en','um':'en','us':'en','vc':'en','vg':'en','vi':'en','zm':'en','zw':'en',
     'ar':'es','bo':'es','cl':'es','co':'es','cr':'es','cu':'es','do':'es','ea':'es','ec':'es','es':'es','gq':'es','gt':'es','hn':'es','ic':'es','mx':'es','ni':'es','pa':'es','pe':'es','pr':'es','py':'es','sv':'es','uy':'es','ve':'es',
-    'bf':'fr','bi':'fr','bj':'fr','bl':'fr','cd':'fr','cf':'fr','cg':'fr','ci':'fr','cm':'fr','cp':'fr','dj':'fr','fr':'fr','ga':'fr','gf':'fr','gn':'fr','gp':'fr','mc':'fr','ml':'fr','mq':'fr','nc':'fr','ne':'fr','pf':'fr','pm':'fr','re':'fr','sn':'fr','td':'fr','tf':'fr','tg':'fr','wf':'fr','yt':'fr',
     'ph':'fp',  # added
+    'bf':'fr','bi':'fr','bj':'fr','bl':'fr','cd':'fr','cf':'fr','cg':'fr','ci':'fr','cm':'fr','cp':'fr','dj':'fr','fr':'fr','ga':'fr','gf':'fr','gn':'fr','gp':'fr','mc':'fr','ml':'fr','mq':'fr','nc':'fr','ne':'fr','pf':'fr','pm':'fr','re':'fr','sn':'fr','td':'fr','tf':'fr','tg':'fr','wf':'fr','yt':'fr',
     'id':'id',
     'it':'it','sm':'it','va':'it',
     'jp':'ja',
+    'kh':'km',
     'kp':'ko','kr':'ko',
+    'mn':'mn',
     'mm':'my',  # added
+    'np':'ne',
     'ao':'pt','cv':'pt','gw':'pt','mz':'pt','pt':'pt','st':'pt',
     'br':'pt-BR',
     'ru':'ru',
