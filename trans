@@ -344,4 +344,3 @@ if [ "${kind}" == "lang_detect" ]; then
     ${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} ${kind} "" "${src}" ${engine} ${src_lang} ${tgt_lang} ${debug}
   fi
 fi
-
