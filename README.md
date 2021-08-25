@@ -159,6 +159,7 @@ Slackアプリ作成に必要なファイルも本リポジトリに入れてあ
 
 5. Slackアプリの設定画面の左側メニュー"Settings"カテゴリにある"Basic Information"をクリックします。  
 "App Credentials"の"Verification Token"に表示された値を控えておきます。  
+また、"Display Information"からSlackアプリのアイコンを設定できるので、icon512x512.pngを指定します。
 （ここまでの手順で、2.で指定した権限を持ち、Slackワークスペースを操作できるSlackアプリが作成できました。実際の操作はSlack APIを経由して、6.でデプロイするHerokuアプリから行います。）
 
 6. 本レポジトリの内容を、Herokuにデプロイします。  
