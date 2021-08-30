@@ -113,14 +113,23 @@ def reaction_added(event_data):
     trans_cmd = ''
     if len(trans_pairs) == 0:    # There's no translation pair
         debug_msg('trans pairs not found: '+src_lang+' to '+tgt_lang+'\nuse trans pair en to '+tgt_lang)
-        trans_cmd = './trans text "'+src_message+'" generalNT en '+tgt_lang
+        if tgt_lang == 'pt-BR':
+            trans_cmd = './trans text "'+src_message+'" voicetraNT en '+tgt_lang
+        else:
+            trans_cmd = './trans text "'+src_message+'" generalNT en '+tgt_lang
     else:
         for i, pair in enumerate(trans_pairs):
             src_lang, tgt_lang = pair.split('_')
             if i == 0:
-                trans_cmd = './trans text "'+src_message+'" generalNT '+src_lang+' '+tgt_lang
+                if src_lang == 'pt-BR' or tgt_lang == 'pt-BR':
+                    trans_cmd = './trans text "'+src_message+'" voicetraNT '+src_lang+' '+tgt_lang
+                else:
+                    trans_cmd = './trans text "'+src_message+'" generalNT '+src_lang+' '+tgt_lang
             else:
-                trans_cmd += ' | ./trans text "" generalNT '+src_lang+' '+tgt_lang
+                if src_lang == 'pt-BR' or tgt_lang == 'pt-BR':
+                    trans_cmd += ' | ./trans text "" voicetraNT '+src_lang+' '+tgt_lang
+                else:
+                    trans_cmd += ' | ./trans text "" generalNT '+src_lang+' '+tgt_lang
     proc_trans = sp.Popen(trans_cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
     proc_trans_std_out, proc_trans_std_err = proc_trans.communicate()
     tgt_message = proc_trans_std_out.decode('utf-8').rstrip()
