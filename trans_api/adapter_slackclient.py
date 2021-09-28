@@ -120,7 +120,7 @@ def reaction_added(event_data):
                 return HttpResponse('')
     with open(TRANSLATED_MSG_HASHED_FILE, 'a') as f:
         debug_msg('new message to translate: '+msg_info)
-        print(event_id, file=f)
+        print(msg_info, file=f)
     # Translate message
     debug_msg('call get_trans_pairs('+src_lang+', '+tgt_lang+')')
     trans_pairs = get_trans_pairs(src_lang, tgt_lang)
