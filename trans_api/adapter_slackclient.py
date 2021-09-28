@@ -110,7 +110,7 @@ def reaction_added(event_data):
         return HttpResponse('')
     # If the same message/lang-pair is already translated recently (recorded in TRANSLATED_MSG_HASHED_FILE), ignore event
     debug_msg('before msg_info create')
-    msg_info = 'lang_pair: '+src_lang+'-'+tgt_lang+'\tmessage_digest: '+hashlib.sha224(src_message.encode("utf-8"))
+    msg_info = 'lang_pair: '+src_lang+'-'+tgt_lang+'\tmessage_digest: '+hashlib.sha224(src_message.encode("utf-8")).hexdigest()
     debug_msg('msg_info created: '+msg_info)
     if os.path.isfile(TRANSLATED_MSG_HASHED_FILE):
         with open(TRANSLATED_MSG_HASHED_FILE, 'r') as f:
