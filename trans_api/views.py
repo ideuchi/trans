@@ -124,6 +124,7 @@ def arxiv_check(request):
         CLIENT.api_call(api_method='chat.postMessage', json={'channel': post_channel, 'text': paper_info})
         message += 'paper_info: '+paper_info+'\n'
     debug_msg('/arxiv_check result:\n' + message)
+    return HttpResponse('')
 
 def debug_cat(request):
     message = '/debug_cat called.\n'
