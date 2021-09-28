@@ -3,6 +3,7 @@ from django.http import HttpResponse
 import os
 import datetime
 import subprocess as sp
+import hashlib
 
 SLACK_VERIFICATION_TOKEN = os.environ.get('SLACK_VERIFICATION_TOKEN','')
 SLACK_BOT_TOKEN = os.environ.get('SLACK_BOT_TOKEN','')
@@ -25,7 +26,8 @@ def debug_msg(str):
         str_time = time.strftime('%Y/%m/%d %H:%M:%S')
         print('\n'+str_time+' '+str+'\n', file=f)
 
-RESPONCE_FILE = 'response.txt'
+RESPONCED_EVENT_ID_FILE = 'responsed_event_id.txt'
+TRANSLATED_MSG_HASHED_FILE = 'translated_msg_hashed.txt'
 
 langs = ['ar', 'de', 'en', 'es', 'fp', 'fr', 'id', 'it', 'ja', 'ko', 'pt', 'km', 'mn', 'my', 'ne', 'pt-BR', 'ru', 'th', 'vi', 'zh-CN', 'zh-TW']
 lang_pairs = ['ar_en', 'ar_ja', 'de_en', 'de_ja', 'en_ar', 'en_de', 'en_es', 'en_fp', 'en_fr', 'en_id', 'en_it', 'en_ja', 'en_km', 'en_ko', 'en_mn', 'en_my', 'en_ne', 'en_pt', 'en_ru', 'en_th', 'en_vi', 'en_zh-CN', 'en_zh-TW', 'es_en', 'es_ja', 'fp_en', 'fp_ja', 'fr_en', 'fr_ja', 'id_en', 'id_ja', 'it_en', 'it_ja', 'ja_ar', 'ja_de', 'ja_en', 'ja_es', 'ja_fp', 'ja_fr', 'ja_id', 'ja_it', 'ja_km', 'ja_ko', 'ja_mn', 'ja_my', 'ja_ne', 'ja_pt', 'ja_pt-BR', 'ja_ru', 'ja_th', 'ja_vi', 'ja_zh-CN', 'ja_zh-TW', 'km_en', 'km_ja', 'ko_en', 'ko_ja', 'mn_en', 'mn_ja', 'my_en', 'my_ja', 'ne_en', 'ne_ja', 'pt_en', 'pt_ja', 'pt-BR_ja', 'ru_en', 'ru_ja', 'th_en', 'th_ja', 'vi_en', 'vi_ja', 'zh-CN_en', 'zh-CN_ja', 'zh-TW_en', 'zh-TW_ja']
@@ -84,13 +86,13 @@ def reaction_added(event_data):
         debug_msg('emoji is not in target lang: emoji = '+emoji)
         return HttpResponse('')
     # If same event is already received, ignore event (Slack sends same event in about 2 to 3 sec)
-    if os.path.isfile(RESPONCE_FILE):
-        with open(RESPONCE_FILE, 'r') as f:
+    if os.path.isfile(RESPONCED_EVENT_ID_FILE):
+        with open(RESPONCED_EVENT_ID_FILE, 'r') as f:
             lines = f.readlines()
             if event_id+'\n' in lines:
-                debug_msg('event already handled: '+event_id)
+                debug_msg('This event is already handled: '+event_id)
                 return HttpResponse('')
-    with open(RESPONCE_FILE, 'a') as f:
+    with open(RESPONCED_EVENT_ID_FILE, 'a') as f:
         debug_msg('new event to handle: '+event_id)
         print(event_id, file=f)
     # Get original message
@@ -106,6 +108,17 @@ def reaction_added(event_data):
     if proc_lang_std_err.decode('utf-8').rstrip() != '':
         debug_msg('trans lang_detect std_err: '+proc_lang_std_err.decode('utf-8').rstrip())
         return HttpResponse('')
+    # If the same message/lang-pair is already translated recently (recorded in TRANSLATED_MSG_HASHED_FILE), ignore event
+    msg_info = src_lang+'-'+tgt_lang+'\tmessage_digest: '+hashlib.sha224(src_message.encode("utf-8"))
+    if os.path.isfile(TRANSLATED_MSG_HASHED_FILE):
+        with open(TRANSLATED_MSG_HASHED_FILE, 'r') as f:
+            lines = f.readlines()
+            if msg_info+'\n' in lines:
+                debug_msg('This message/lang-pair is already translated: '+msg_info)
+                return HttpResponse('')
+    with open(TRANSLATED_MSG_HASHED_FILE, 'a') as f:
+        debug_msg('new message to translate: '+msg_info)
+        print(event_id, file=f)
     # Translate message
     debug_msg('call get_trans_pairs('+src_lang+', '+tgt_lang+')')
     trans_pairs = get_trans_pairs(src_lang, tgt_lang)

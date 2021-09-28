@@ -7,3 +7,4 @@ gunicorn
 pyee
 slack_sdk
 aiohttp
+hashlib
