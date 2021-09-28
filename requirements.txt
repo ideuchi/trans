@@ -7,3 +7,5 @@ gunicorn
 pyee
 slack_sdk
 aiohttp
+pytz
+arxiv

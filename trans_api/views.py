@@ -4,17 +4,24 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 import os
 import datetime
+import pytz
 import subprocess as sp
+import arxiv
 
-from .adapter_slackclient import slack_events_adapter, SLACK_VERIFICATION_TOKEN
+from .adapter_slackclient import slack_events_adapter, SLACK_VERIFICATION_TOKEN, SLACK_BOT_TOKEN, CLIENT
+ARXIV_CHECK_KEYWORD = os.environ.get('ARXIV_CHECK_KEYWORD','')
+ARXIV_CHECK_DELAY_DAY = os.environ.get('ARXIV_CHECK_DELAY_DAY',7)
+ARXIV_CHECK_SPAN_HOUR = os.environ.get('ARXIV_CHECK_SPAN_HOUR',24)
+ARXIV_CHECK_TRANS = os.environ.get('ARXIV_CHECK_TRANS','')
+ARXIV_CHECK_CHANNEL = os.environ.get('ARXIV_CHECK_CHANNEL','arxiv')
 
 # Create your views here.
 
 DEBUG_FILE = 'debug.txt'
 def debug_msg(str):
     with open(DEBUG_FILE, 'a') as f:
-        time = datetime.datetime.now()
-        str_time = time.strftime('%Y/%m/%d %H:%M:%S')
+        dt_now = datetime.datetime.now(pytz.timezone('Asia/Tokyo'))
+        str_time = dt_now.strftime('%Y/%m/%d %H:%M:%S')
         print('\n'+str_time+' '+str+'\n', file=f)
 
 def render_json_response(request, data, status=None, support_jsonp=False):
@@ -62,6 +69,61 @@ def slack_events(request, *args, **kwargs):  # cf. https://api.slack.com/events/
         return HttpResponse('')
     # default case
     return HttpResponse('')
+
+def arxiv_check(request):
+    message = '/arxiv_check called.\n'
+    dt_now = datetime.datetime.now(pytz.timezone('Asia/Tokyo'))
+    if 'keyword' in request.GET:
+        keyword = request.GET.get('keyword')
+    else:
+        keyword = ARXIV_CHECK_KEYWORD
+    if 'delay_day' in request.GET:
+        delay_day = int(request.GET.get('delay_day'))
+        dt_from = dt_now - datetime.timedelta(days=delay_day)
+    else:
+        dt_from = dt_now - datetime.timedelta(days=ARXIV_CHECK_DELAY_DAY)
+    if 'span_hour' in request.GET:
+        span_hour = int(request.GET.get('span_hour'))
+        dt_to = dt_from + datetime.timedelta(hours=span_hour)
+    else:
+        dt_to = dt_from + datetime.timedelta(hours=ARXIV_CHECK_SPAN_HOUR)
+    arxiv_check_query = 'abs:"'+keyword+'" AND submittedDate:[{} TO {}]'.format(dt_from, dt_to)
+    message += 'arxiv_check_query: '+arxiv_check_query
+    arxiv_search = arxiv.Search(query=arxiv_check_query, sort_by=arxiv.SortCriterion.SubmittedDate)
+    if 'trans_tgt_lang' in request.GET:
+        trans_tgt_lang = request.GET.get('trans_tgt_lang')
+    else:
+        trans_tgt_lang = ARXIV_CHECK_TRANS
+    if 'post_channel' in request.GET:
+        post_channel = request.GET.get('post_channel')
+    else:
+        post_channel = ARXIV_CHECK_CHANNEL
+    for result in arxiv_search.results():
+        paper_info = 'PDF URL: '+result.pdf_url+'\n'
+        paper_info += 'Authors: '+', '.join(list(map(str, result.authors)))+'\n'
+        paper_info += 'Title: '+result.title+'\n'
+        if trans_tgt_lang != '':
+            tgt_lang = ARXIV_CHECK_TRANS
+            if tgt_lang == 'pt-BR':
+                trans_cmd = './trans text "Title: '+result.title+'" voicetraNT en '+tgt_lang
+            else:
+                trans_cmd = './trans text "Title: '+result.title+'" generalNT en '+tgt_lang
+            proc_trans = sp.Popen(trans_cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+            proc_trans_std_out, proc_trans_std_err = proc_trans.communicate()
+            paper_info += proc_trans_std_out.decode('utf-8').rstrip()+'\n'
+        paper_info += 'Abstract: '+result.summary.replace('\n', ' ')+'\n'
+        if trans_tgt_lang != '':
+            tgt_lang = ARXIV_CHECK_TRANS
+            if tgt_lang == 'pt-BR':
+                trans_cmd = './trans text "Abstract: '+result.summary.replace('\n', ' ')+'" voicetraNT en '+tgt_lang
+            else:
+                trans_cmd = './trans text "Abstract: '+result.summary.replace('\n', ' ')+'" generalNT en '+tgt_lang
+            proc_trans = sp.Popen(trans_cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+            proc_trans_std_out, proc_trans_std_err = proc_trans.communicate()
+            paper_info += proc_trans_std_out.decode('utf-8').rstrip()+'\n'
+        CLIENT.api_call(api_method='chat.postMessage', json={'channel': post_channel, 'text': paper_info})
+        message += 'paper_info: '+paper_info+'\n'
+    debug_msg('/arxiv_check result:\n' + message)
 
 def debug_cat(request):
     message = '/debug_cat called.\n'
