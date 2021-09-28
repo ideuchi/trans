@@ -20,6 +20,7 @@ import trans_api.views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('slack_events/', trans_api.views.slack_events, name='slack_events'),
+    path('arxiv_check/', trans_api.views.arxiv_check, name='arxiv_check'),
     path('debug_cat/', trans_api.views.debug_cat, name='debug_cat'),
     path('debug_ls/', trans_api.views.debug_ls, name='debug_ls'),
     path('debug_cmd/', trans_api.views.debug_cmd, name='debug_cmd'),
