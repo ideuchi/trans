@@ -79,14 +79,14 @@ def arxiv_check(request):
         keyword = ARXIV_CHECK_KEYWORD
     if 'delay_day' in request.GET:
         delay_day = int(request.GET.get('delay_day'))
-        dt_from = dt_now - datetime.timedelta(days=delay_day)
+        dt_from = (dt_now - datetime.timedelta(days=delay_day)).strftime('%Y%m%d%H%M%S')
     else:
         dt_from = (dt_now - datetime.timedelta(days=ARXIV_CHECK_DELAY_DAY)).strftime('%Y%m%d%H%M%S')
     if 'span_hour' in request.GET:
         span_hour = int(request.GET.get('span_hour'))
         dt_to = (dt_from + datetime.timedelta(hours=span_hour)).strftime('%Y%m%d%H%M%S')
     else:
-        dt_to = dt_from + datetime.timedelta(hours=ARXIV_CHECK_SPAN_HOUR)
+        dt_to = (dt_from + datetime.timedelta(hours=ARXIV_CHECK_SPAN_HOUR)).strftime('%Y%m%d%H%M%S')
     arxiv_check_query = 'abs:"'+keyword+'" AND submittedDate:[{} TO {}]'.format(dt_from, dt_to)
     message += 'arxiv_check_query: '+arxiv_check_query
     arxiv_search = arxiv.Search(query=arxiv_check_query, sort_by=arxiv.SortCriterion.SubmittedDate)
