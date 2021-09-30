@@ -106,7 +106,7 @@ def arxiv_check(request):
         trans_tgt_lang = ARXIV_CHECK_TRANS
     # Send search result (one message corresponding to one paper)
     for result in arxiv_search.results():
-        paper_info += 'Title: '+result.title+'\n'
+        paper_info = 'Title: '+result.title+'\n'
         if trans_tgt_lang != '':
             paper_info += trans('Title: '+result.title, 'en', trans_tgt_lang)+'\n'
         paper_info += 'Authors: '+', '.join(list(map(str, result.authors)))+'\n'
@@ -114,7 +114,7 @@ def arxiv_check(request):
         paper_info += 'Abstract: '+result.summary.replace('\n', ' ')+'\n'
         if trans_tgt_lang != '':
             paper_info += trans('Abstract: '+result.summary.replace('\n', ' '), 'en', trans_tgt_lang)+'\n'
-        paper_info = 'PDF URL: '+result.pdf_url+'\n'
+        paper_info += 'PDF URL: '+result.pdf_url+'\n'
         CLIENT.api_call(api_method='chat.postMessage', json={'channel': post_channel, 'text': paper_info})
         message += '-----\npaper_info: \n'+paper_info+'\n'
     debug_msg('/arxiv_check result:\n' + message)
