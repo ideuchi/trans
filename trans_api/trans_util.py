@@ -57,7 +57,7 @@ def lang_detect(src_message):
         return 'en'  # if lang_detect didn't work, treat source message as en
     return src_lang
 
-def trans(src_message, src_lang, tgt_lang):
+def trans(src_message, src_lang, tgt_lang, record_history=True):
     # If the same message/lang-pair is already translated recently (recorded in TRANSLATED_MSG_HASHED_FILE), ignore event
     msg_info = 'lang_pair: '+src_lang+'-'+tgt_lang+'\tmessage_digest: '+hashlib.sha224(src_message.encode("utf-8")).hexdigest()
     debug_msg('(trans_util) msg_info created: '+msg_info)
