@@ -36,10 +36,6 @@
       "description": "Search start date (in days from now)",
       "value": "7"
     },
-    "ARXIV_CHECK_ONLY_NEW_ARTICLES": {
-      "description": "When this parameter is set to ON, papers after the time of the latest message posted on the channel are searched",
-      "value": "ON or OFF"
-    },
     "ARXIV_CHECK_TRANS": {
       "description": "Translation target language code ('ja' for Japanese), if this value is 'none', no translation will be performed",
       "value": "'none' or a language code (ex. 'ja')"

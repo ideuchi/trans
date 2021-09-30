@@ -16,7 +16,7 @@ from .adapter_slackclient import slack_events_adapter, CLIENT, SLACK_VERIFICATIO
 ARXIV_CHECK_CHANNEL = os.environ.get('ARXIV_CHECK_CHANNEL','arxiv')
 ARXIV_CHECK_KEYWORD = os.environ.get('ARXIV_CHECK_KEYWORD','machine translation')
 ARXIV_CHECK_FROM_DAYS_BEFORE = os.environ.get('ARXIV_CHECK_FROM_DAYS_BEFORE','7')
-ARXIV_CHECK_ONLY_NEW_ARTICLES = os.environ.get('ARXIV_CHECK_ONLY_NEW_ARTICLES','ON')
+ARXIV_CHECK_ONLY_NEW_ARTICLES = os.environ.get('ARXIV_CHECK_ONLY_NEW_ARTICLES','OFF')
 ARXIV_CHECK_TRANS = os.environ.get('ARXIV_CHECK_TRANS','')  # '' means no translation
 
 # Hidden options
@@ -95,6 +95,7 @@ def arxiv_check(request):
     else:
         only_new_articles = ARXIV_CHECK_ONLY_NEW_ARTICLES
     if only_new_articles == 'ON':
+        # TODO: Getting date of latest paper after 'Published Date: ', because paper from arXiv API is not realtime
         ts = time.mktime(dt_now.timetuple())
         message_history = CLIENT.conversations_history(channel=post_channel, inclusive=True, oldest=ts, limit=1)
         debug_msg('message_history:\n' + str(message_history))
