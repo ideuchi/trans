@@ -8,7 +8,7 @@ import hashlib
 SLACK_VERIFICATION_TOKEN = os.environ.get('SLACK_VERIFICATION_TOKEN','')
 SLACK_BOT_TOKEN = os.environ.get('SLACK_BOT_TOKEN','')
 
-from trans_api.trans_util import trans, lang_detect, is_available_lang_code, check_handled_event, debug_msg
+from trans_api.trans_util import trans, lang_detect, is_available_lang_code, is_already_handled_event, debug_msg
 slack_flag_langs = {
     # Extracted contry-lang pairs that has available lang from https://github.com/slackapi/reacjilator/blob/master/langcode.js
     'ae':'ar','bh':'ar','dz':'ar','eg':'ar','eh':'ar','iq':'ar','jo':'ar','kw':'ar','lb':'ar','ly':'ar','ma':'ar','mr':'ar','om':'ar','ps':'ar','qa':'ar','sa':'ar','sd':'ar','sw':'ar','tn':'ar','ye':'ar',
@@ -62,7 +62,7 @@ def reaction_added(event_data):
         debug_msg('recieved emoji is not in translation target languages: emoji = '+emoji)
         return HttpResponse('')
     # If same event is already received, ignore the event (If a response to the event is not returned, Slack sends same event in about 2 to 3 sec)
-    if check_handled_event(event_id):
+    if is_already_handled_event(event_id):
         debug_msg('This event is already handled: '+event_id)
         return HttpResponse('')
     debug_msg('This event is a new event to handle: '+event_id)

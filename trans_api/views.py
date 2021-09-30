@@ -59,7 +59,7 @@ def slack_events(request, *args, **kwargs):  # cf. https://api.slack.com/events/
             raise PermissionDenied(message)
             debug_msg('\n'+message)
         event_type = event_data['event']['type']
-        debug_msg(' dispatched to slack_events_adapter.')
+        debug_msg('dispatched to slack_events_adapter.')
         slack_events_adapter.emit(event_type, event_data)
         return HttpResponse('')
     # default case
