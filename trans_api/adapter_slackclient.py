@@ -73,3 +73,4 @@ def reaction_added(event_data):
     debug_msg('response to reaction_added event:\n  trans_original: '+src_message+'\n  lang_pair: '+src_lang+'-'+tgt_lang+'\n  trans_result: '+tgt_message)
     if tgt_message != '':
         CLIENT.api_call(api_method='chat.postMessage', json={'channel': channel, 'thread_ts': ts, 'text': tgt_message})
+
