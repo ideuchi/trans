@@ -99,6 +99,6 @@ def trans(src_message, src_lang, tgt_lang):
     debug_msg('(trans_util) trans_cmd: "'+trans_cmd+'", std_out: '+proc_trans_std_out.decode('utf-8').rstrip())
     if proc_trans_std_err.decode('utf-8').rstrip() != '':
         debug_msg('(trans_util) trans_cmd: "'+trans_cmd+'", std_err: '+proc_trans_std_err.decode('utf-8').rstrip())
-        return ''  # if trans didn't work, return '' as target message
+        return 'Translation error: '+proc_trans_std_err.decode('utf-8').rstrip()  # if trans didn't work, return error message
     return tgt_message
 
