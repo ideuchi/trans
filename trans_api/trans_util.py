@@ -3,17 +3,29 @@ import datetime
 import pytz
 import subprocess as sp
 
-SLACK_VERIFICATION_TOKEN = os.environ.get('SLACK_VERIFICATION_TOKEN','')
-SLACK_BOT_TOKEN = os.environ.get('SLACK_BOT_TOKEN','')
 
 DEBUG_FILE = 'debug.txt'
+
 def debug_msg(str):
     with open(DEBUG_FILE, 'a') as f:
         dt_now = datetime.datetime.now(pytz.timezone('Asia/Tokyo'))
         str_time = dt_now.strftime('%Y/%m/%d %H:%M:%S')
         print('\n'+str_time+' '+str+'\n', file=f)
 
+
 RESPONCED_EVENT_ID_FILE = 'responsed_event_id.txt'
+
+def check_handled_event(event_id):
+    if os.path.isfile(RESPONCED_EVENT_ID_FILE):
+        with open(RESPONCED_EVENT_ID_FILE, 'r') as f:
+            lines = f.readlines()
+            if event_id+'\n' in lines:
+                return True
+    with open(RESPONCED_EVENT_ID_FILE, 'a') as f:
+        print(event_id, file=f)
+        return False
+
+
 TRANSLATED_MSG_HASHED_FILE = 'translated_msg_hashed.txt'
 
 langs = ['ar', 'de', 'en', 'es', 'fp', 'fr', 'id', 'it', 'ja', 'ko', 'pt', 'km', 'mn', 'my', 'ne', 'pt-BR', 'ru', 'th', 'vi', 'zh-CN', 'zh-TW']
@@ -55,16 +67,6 @@ def get_trans_pairs(lang1, lang2):
         return ['_'.join([lang1, 'en']), '_'.join(['en', lang2])]
     else:
         return []
-
-def check_handled_event(event_id)
-    if os.path.isfile(RESPONCED_EVENT_ID_FILE):
-        with open(RESPONCED_EVENT_ID_FILE, 'r') as f:
-            lines = f.readlines()
-            if event_id+'\n' in lines:
-                return True
-    with open(RESPONCED_EVENT_ID_FILE, 'a') as f:
-        print(event_id, file=f)
-        return False
 
 def lang_detect(src_message):
     lang_detect_cmd = './trans lang_detect "'+src_message+'"'
