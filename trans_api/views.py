@@ -94,14 +94,15 @@ def arxiv_check(request):
     else:
         post_channel = ARXIV_CHECK_CHANNEL
     for result in arxiv_search.results():
-        paper_info = 'PDF URL: '+result.pdf_url+'\n'
-        paper_info += 'Authors: '+', '.join(list(map(str, result.authors)))+'\n'
         paper_info += 'Title: '+result.title+'\n'
         if trans_tgt_lang != '':
             paper_info += trans('Title: '+result.title, 'en', trans_tgt_lang)+'\n'
+        paper_info += 'Authors: '+', '.join(list(map(str, result.authors)))+'\n'
+        paper_info += 'Published Date: '+result.published+'\n'
         paper_info += 'Abstract: '+result.summary.replace('\n', ' ')+'\n'
         if trans_tgt_lang != '':
             paper_info += trans('Abstract: '+result.summary.replace('\n', ' '), 'en', trans_tgt_lang)+'\n'
+        paper_info = 'PDF URL: '+result.pdf_url+'\n'
         CLIENT.api_call(api_method='chat.postMessage', json={'channel': post_channel, 'text': paper_info})
         message += '-----\npaper_info: \n'+paper_info+'\n'
     debug_msg('/arxiv_check result:\n' + message)
@@ -151,3 +152,4 @@ def debug_cmd(request):
     message += cmd + ' result: \n  ' + cmd + ' std_out:\n' + std_out.decode('utf-8').rstrip() + '\n  ' + cmd + ' std_err:\n' + std_err.decode('utf-8').rstrip() + '\n'
     debug_msg('/debug_cmd result:\n' + message)
     return HttpResponse('<pre>' + message + '</pre>')
+
