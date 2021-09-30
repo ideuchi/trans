@@ -94,7 +94,7 @@ def arxiv_check(request):
         ts = time.mktime(dt_now.timetuple())
         message_history = CLIENT.conversations_history(channel=post_channel, inclusive=True, oldest=ts, limit=1)
         debug_msg('message_history:\n' + str(message_history))
-        dt_from = datetime.datetime.fromtimestamp(int(message_history['messages'][0]['ts'])+1)
+        dt_from = datetime.datetime.fromtimestamp(int(message_history['oldest'])+1)
     # Building searching query and getting search result
     arxiv_check_query = 'abs:"'+keyword+'" AND submittedDate:[{} TO {}]'.format(dt_from.strftime('%Y%m%d%H%M%S'), dt_now.strftime('%Y%m%d%H%M%S'))
     message += 'arxiv_check_query: '+arxiv_check_query
