@@ -105,10 +105,10 @@ def arxiv_check(request):
         paper_info += 'Authors: '+', '.join(list(map(str, result.authors)))+'\n'
         paper_info += 'Title: '+result.title+'\n'
         if trans_tgt_lang != '':
-            paper_info += trans('Title: '+result.title, 'en', tgt_lang)
+            paper_info += trans('Title: '+result.title, 'en', trans_tgt_lang)+'\n'
         paper_info += 'Abstract: '+result.summary.replace('\n', ' ')+'\n'
         if trans_tgt_lang != '':
-            paper_info += trans('Abstract: '+result.summary.replace('\n', ' '), 'en', tgt_lang)
+            paper_info += trans('Abstract: '+result.summary.replace('\n', ' '), 'en', trans_tgt_lang)+'\n'
         CLIENT.api_call(api_method='chat.postMessage', json={'channel': post_channel, 'text': paper_info})
         message += '-----\npaper_info: \n'+paper_info+'\n'
     debug_msg('/arxiv_check result:\n' + message)
