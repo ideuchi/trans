@@ -110,7 +110,7 @@ def arxiv_check(request):
         if trans_tgt_lang != '':
             paper_info += trans('Title: '+result.title, 'en', trans_tgt_lang)+'\n'
         paper_info += 'Authors: '+', '.join(list(map(str, result.authors)))+'\n'
-        paper_info += 'Published Date: '+result.published+'\n'
+        paper_info += 'Published Date: '+result.published.strftime('%Y/%m/%d %H:%M:%S')+'\n'
         paper_info += 'Abstract: '+result.summary.replace('\n', ' ')+'\n'
         if trans_tgt_lang != '':
             paper_info += trans('Abstract: '+result.summary.replace('\n', ' '), 'en', trans_tgt_lang)+'\n'
