@@ -15,6 +15,7 @@ from .adapter_slackclient import slack_events_adapter, CLIENT, SLACK_VERIFICATIO
 ARXIV_CHECK_CHANNEL = os.environ.get('ARXIV_CHECK_CHANNEL','arxiv')
 ARXIV_CHECK_KEYWORD = os.environ.get('ARXIV_CHECK_KEYWORD','machine translation')
 ARXIV_CHECK_FROM_DAYS_BEFORE = os.environ.get('ARXIV_CHECK_FROM_DAYS_BEFORE',10)
+ARXIV_CHECK_TO_DAYS_BEFORE = os.environ.get('ARXIV_CHECK_TO_DAYS_BEFORE','')
 ARXIV_CHECK_ONLY_NEW_ARTICLES = os.environ.get('ARXIV_CHECK_ONLY_NEW_ARTICLES','ON')
 ARXIV_CHECK_TRANS = os.environ.get('ARXIV_CHECK_TRANS','')  # '' means no translation
 
@@ -95,8 +96,16 @@ def arxiv_check(request):
         message_history = CLIENT.conversations_history(channel=post_channel, inclusive=True, oldest=ts, limit=1)
         debug_msg('message_history:\n' + str(message_history))
         dt_from = datetime.datetime.fromtimestamp(int(float(message_history['oldest']))+1)
+    # OPTION FOR DEBUGGING: set "to date" if it exists, but latest datetime is used default to get latest information
+    if 'to_days_before' in request.GET:
+        to_days_before = int(request.GET.get('to_days_before'))
+        dt_to = dt_now - datetime.timedelta(days=to_days_before)
+    elif ARXIV_CHECK_TO_DAYS_BEFORE != '':
+        dt_to = dt_now - datetime.timedelta(days=ARXIV_CHECK_TO_DAYS_BEFORE)
+    else:
+        dt_to = dt_now
     # Building searching query and getting search result
-    arxiv_check_query = 'abs:"'+keyword+'" AND submittedDate:[{} TO {}]'.format(dt_from.strftime('%Y%m%d%H%M%S'), dt_now.strftime('%Y%m%d%H%M%S'))
+    arxiv_check_query = 'abs:"'+keyword+'" AND submittedDate:[{} TO {}]'.format(dt_from.strftime('%Y%m%d%H%M%S'), dt_to.strftime('%Y%m%d%H%M%S'))
     message += 'arxiv_check_query: '+arxiv_check_query
     arxiv_search = arxiv.Search(query=arxiv_check_query, sort_by=arxiv.SortCriterion.SubmittedDate)
     # Translation option ('' means on translation)
