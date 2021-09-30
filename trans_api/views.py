@@ -8,7 +8,7 @@ import pytz
 import subprocess as sp
 import arxiv
 
-from trans_api.trans_util import trans, debug_msg
+from trans_api.trans_util import trans, debug_msg, DEBUG_FILE
 from .adapter_slackclient import slack_events_adapter, CLIENT, SLACK_VERIFICATION_TOKEN
 
 ARXIV_CHECK_KEYWORD = os.environ.get('ARXIV_CHECK_KEYWORD','')
