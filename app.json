@@ -2,7 +2,7 @@
   "name": "trans Slack Bot demo",
   "description": "A translation bot for Slack that translates a message when a user reacted with an emoji (The specifications are based on reacjilator: https://github.com/slackAPI/reacjilator)",
   "repository": "https://github.com/ideuchi/trans",
-  "keywords": ["trans", "slack API", "bot", "TexTra"],
+  "keywords": ["trans", "slack API", "bot", "TexTra", "arXiv"],
   "env": {
     "NAME": {
       "description": "TexTra user name",
@@ -23,6 +23,22 @@
     "SLACK_VERIFICATION_TOKEN": {
       "description": "Slack Verification Token",
       "value": "xxxxxxxxxxxxxxxxxxxxxxxx"
+    },
+    "ARXIV_CHECK_CHANNEL": {
+      "description": "Channel ID for posting paper from arXiv",
+      "value": "xxxxxxxxxxx"
+    },
+    "ARXIV_CHECK_FROM_DAYS_BEFORE": {
+      "description": "Search start date (in days from now)",
+      "value": "7"
+    },
+    "ARXIV_CHECK_ONLY_NEW_ARTICLES": {
+      "description": "When this parameter is set to ON, papers after the time of the latest message posted on the channel are searched",
+      "value": "ON or OFF"
+    },
+    "ARXIV_CHECK_TRANS": {
+      "description": "Translation target language code ("ja" for Japanese), if this value is empty, no translation will be performed",
+      "value": ""
     }
   },
   "image": "heroku/python"
