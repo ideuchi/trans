@@ -15,7 +15,7 @@ from .adapter_slackclient import slack_events_adapter, CLIENT, SLACK_VERIFICATIO
 # Options to collect latest papers from arXiv
 ARXIV_CHECK_CHANNEL = os.environ.get('ARXIV_CHECK_CHANNEL','arxiv')
 ARXIV_CHECK_KEYWORD = os.environ.get('ARXIV_CHECK_KEYWORD','machine translation')
-ARXIV_CHECK_FROM_DAYS_BEFORE = os.environ.get('ARXIV_CHECK_FROM_DAYS_BEFORE',7)
+ARXIV_CHECK_FROM_DAYS_BEFORE = os.environ.get('ARXIV_CHECK_FROM_DAYS_BEFORE','7')
 ARXIV_CHECK_ONLY_NEW_ARTICLES = os.environ.get('ARXIV_CHECK_ONLY_NEW_ARTICLES','ON')
 ARXIV_CHECK_TRANS = os.environ.get('ARXIV_CHECK_TRANS','')  # '' means no translation
 
@@ -88,7 +88,7 @@ def arxiv_check(request):
         from_days_before = int(request.GET.get('from_days_before'))
         dt_from = dt_now - datetime.timedelta(days=from_days_before)
     else:
-        dt_from = dt_now - datetime.timedelta(days=ARXIV_CHECK_FROM_DAYS_BEFORE)
+        dt_from = dt_now - datetime.timedelta(days=int(ARXIV_CHECK_FROM_DAYS_BEFORE))
     # Option to set "from date" to oldest posting
     if 'only_new_articles' in request.GET:
         only_new_articles = request.GET.get('only_new_articles')
