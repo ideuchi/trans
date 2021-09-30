@@ -5,7 +5,7 @@ import datetime
 import subprocess as sp
 import hashlib
 
-from trans_api.trans_util import trans, lang_detect, check_handled_event, debug_msg
+from trans_api.trans_util import trans, lang_detect, slack_flag_langs, check_handled_event, debug_msg
 
 SLACK_VERIFICATION_TOKEN = os.environ.get('SLACK_VERIFICATION_TOKEN','')
 SLACK_BOT_TOKEN = os.environ.get('SLACK_BOT_TOKEN','')
