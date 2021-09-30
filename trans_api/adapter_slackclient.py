@@ -48,19 +48,8 @@ def reaction_added(event_data):
     debug_msg('src message: '+src_message)
     # Detect src lang
     src_lang = lang_detect(src_message)
-    # If the same message/lang-pair is already translated recently (recorded in TRANSLATED_MSG_HASHED_FILE), ignore event
-    msg_info = 'lang_pair: '+src_lang+'-'+tgt_lang+'\tmessage_digest: '+hashlib.sha224(src_message.encode("utf-8")).hexdigest()
-    debug_msg('msg_info created: '+msg_info)
-    if os.path.isfile(TRANSLATED_MSG_HASHED_FILE):
-        with open(TRANSLATED_MSG_HASHED_FILE, 'r') as f:
-            lines = f.readlines()
-            if msg_info+'\n' in lines:
-                debug_msg('This message/lang-pair is already translated: '+msg_info)
-                return HttpResponse('')
-    with open(TRANSLATED_MSG_HASHED_FILE, 'a') as f:
-        debug_msg('new message to translate: '+msg_info)
-        print(msg_info, file=f)
     # Translate message
     tgt_message = trans(src_message, src_lang, tgt_lang)
     debug_msg('response to reaction_added event:\n  cmd: '+trans_cmd+'\n  res: '+tgt_message)
-    CLIENT.api_call(api_method='chat.postMessage', json={'channel': channel, 'thread_ts': ts, 'text': tgt_message})
+    if tgt_message != '':
+        CLIENT.api_call(api_method='chat.postMessage', json={'channel': channel, 'thread_ts': ts, 'text': tgt_message})

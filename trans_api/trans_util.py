@@ -81,6 +81,18 @@ def lang_detect(src_message):
     return src_lang
 
 def trans(src_message, src_lang, tgt_lang):
+    # If the same message/lang-pair is already translated recently (recorded in TRANSLATED_MSG_HASHED_FILE), ignore event
+    msg_info = 'lang_pair: '+src_lang+'-'+tgt_lang+'\tmessage_digest: '+hashlib.sha224(src_message.encode("utf-8")).hexdigest()
+    debug_msg('msg_info created: '+msg_info)
+    if os.path.isfile(TRANSLATED_MSG_HASHED_FILE):
+        with open(TRANSLATED_MSG_HASHED_FILE, 'r') as f:
+            lines = f.readlines()
+            if msg_info+'\n' in lines:
+                debug_msg('This message/lang-pair is already translated: '+msg_info)
+                return ''
+    with open(TRANSLATED_MSG_HASHED_FILE, 'a') as f:
+        debug_msg('new message to translate: '+msg_info)
+        print(msg_info, file=f)
     debug_msg('call get_trans_pairs('+src_lang+', '+tgt_lang+')')
     trans_pairs = get_trans_pairs(src_lang, tgt_lang)
     debug_msg('get_trans_pairs() result: '+str(trans_pairs))
@@ -109,6 +121,6 @@ def trans(src_message, src_lang, tgt_lang):
     tgt_message = proc_trans_std_out.decode('utf-8').rstrip()
     if proc_trans_std_err.decode('utf-8').rstrip() != '':
         debug_msg(trans_cmd+' std_err: '+proc_trans_std_err.decode('utf-8').rstrip())
-        return ''  # if lang_detect didn't work, return '' as target message
+        return ''  # if trans didn't work, return '' as target message
     return tgt_message
 
