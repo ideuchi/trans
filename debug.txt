@@ -1,0 +1,66 @@
+
+2021/09/30 11:36:55 call get_trans_pairs(en, ja)
+
+
+2021/09/30 11:36:55 get_trans_pairs() result: ['en_ja']
+
+
+2021/09/30 11:56:24 call get_trans_pairs(en, ja)
+
+
+2021/09/30 11:56:24 get_trans_pairs() result: ['en_ja']
+
+
+2021/09/30 11:56:25 call get_trans_pairs(en, ja)
+
+
+2021/09/30 11:56:25 get_trans_pairs() result: ['en_ja']
+
+
+2021/09/30 11:56:27 call get_trans_pairs(en, ja)
+
+
+2021/09/30 11:56:27 get_trans_pairs() result: ['en_ja']
+
+
+2021/09/30 11:56:28 call get_trans_pairs(en, ja)
+
+
+2021/09/30 11:56:28 get_trans_pairs() result: ['en_ja']
+
+
+2021/09/30 11:56:31 call get_trans_pairs(en, ja)
+
+
+2021/09/30 11:56:31 get_trans_pairs() result: ['en_ja']
+
+
+2021/09/30 11:56:32 call get_trans_pairs(en, ja)
+
+
+2021/09/30 11:56:32 get_trans_pairs() result: ['en_ja']
+
+
+2021/09/30 11:56:34 call get_trans_pairs(en, ja)
+
+
+2021/09/30 11:56:34 get_trans_pairs() result: ['en_ja']
+
+
+2021/09/30 11:56:35 call get_trans_pairs(en, ja)
+
+
+2021/09/30 11:56:35 get_trans_pairs() result: ['en_ja']
+
+
+2021/09/30 11:56:38 call get_trans_pairs(en, ja)
+
+
+2021/09/30 11:56:38 get_trans_pairs() result: ['en_ja']
+
+
+2021/09/30 11:56:39 call get_trans_pairs(en, ja)
+
+
+2021/09/30 11:56:39 get_trans_pairs() result: ['en_ja']
+

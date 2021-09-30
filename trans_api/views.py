@@ -8,7 +8,7 @@ import pytz
 import subprocess as sp
 import arxiv
 
-from trans_api.trans_util import trans
+from trans_api.trans_util import trans, debug_msg
 from .adapter_slackclient import slack_events_adapter, CLIENT, SLACK_VERIFICATION_TOKEN
 
 ARXIV_CHECK_KEYWORD = os.environ.get('ARXIV_CHECK_KEYWORD','')
@@ -18,13 +18,6 @@ ARXIV_CHECK_TRANS = os.environ.get('ARXIV_CHECK_TRANS','')
 ARXIV_CHECK_CHANNEL = os.environ.get('ARXIV_CHECK_CHANNEL','arxiv')
 
 # Create your views here.
-
-DEBUG_FILE = 'debug.txt'
-def debug_msg(str):
-    with open(DEBUG_FILE, 'a') as f:
-        dt_now = datetime.datetime.now(pytz.timezone('Asia/Tokyo'))
-        str_time = dt_now.strftime('%Y/%m/%d %H:%M:%S')
-        print('\n'+str_time+' '+str+'\n', file=f)
 
 def render_json_response(request, data, status=None, support_jsonp=False):
     json_str = json.dumps(data, ensure_ascii=False, indent=2)
