@@ -28,6 +28,10 @@
       "description": "Channel ID for posting paper from arXiv",
       "value": "xxxxxxxxxxx"
     },
+    "ARXIV_CHECK_KEYWORD": {
+      "description": "Keyword for searching paper from arXiv",
+      "value": "technical term (ex. 'neural machine translation')"
+    },
     "ARXIV_CHECK_FROM_DAYS_BEFORE": {
       "description": "Search start date (in days from now)",
       "value": "7"
