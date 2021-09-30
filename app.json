@@ -37,7 +37,7 @@
       "value": "ON or OFF"
     },
     "ARXIV_CHECK_TRANS": {
-      "description": "Translation target language code ("ja" for Japanese), if this value is empty, no translation will be performed",
+      "description": "Translation target language code ('ja' for Japanese), if this value is empty, no translation will be performed",
       "value": ""
     }
   },
