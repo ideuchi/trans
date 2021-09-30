@@ -8,7 +8,9 @@ import pytz
 import subprocess as sp
 import arxiv
 
-from .adapter_slackclient import slack_events_adapter, SLACK_VERIFICATION_TOKEN, SLACK_BOT_TOKEN, CLIENT
+from .trans_util import trans, SLACK_VERIFICATION_TOKEN, SLACK_BOT_TOKEN
+from .adapter_slackclient import slack_events_adapter, CLIENT
+
 ARXIV_CHECK_KEYWORD = os.environ.get('ARXIV_CHECK_KEYWORD','')
 ARXIV_CHECK_DELAY_DAY = os.environ.get('ARXIV_CHECK_DELAY_DAY',7)
 ARXIV_CHECK_SPAN_HOUR = os.environ.get('ARXIV_CHECK_SPAN_HOUR',24)
@@ -103,26 +105,12 @@ def arxiv_check(request):
         paper_info += 'Authors: '+', '.join(list(map(str, result.authors)))+'\n'
         paper_info += 'Title: '+result.title+'\n'
         if trans_tgt_lang != '':
-            tgt_lang = ARXIV_CHECK_TRANS
-            if tgt_lang == 'pt-BR':
-                trans_cmd = './trans text "Title: '+result.title+'" voicetraNT en '+tgt_lang
-            else:
-                trans_cmd = './trans text "Title: '+result.title+'" generalNT en '+tgt_lang
-            proc_trans = sp.Popen(trans_cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
-            proc_trans_std_out, proc_trans_std_err = proc_trans.communicate()
-            paper_info += proc_trans_std_out.decode('utf-8').rstrip()+'\n'
+            paper_info += trans('Title: '+result.title, 'en', tgt_lang)
         paper_info += 'Abstract: '+result.summary.replace('\n', ' ')+'\n'
         if trans_tgt_lang != '':
-            tgt_lang = ARXIV_CHECK_TRANS
-            if tgt_lang == 'pt-BR':
-                trans_cmd = './trans text "Abstract: '+result.summary.replace('\n', ' ')+'" voicetraNT en '+tgt_lang
-            else:
-                trans_cmd = './trans text "Abstract: '+result.summary.replace('\n', ' ')+'" generalNT en '+tgt_lang
-            proc_trans = sp.Popen(trans_cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
-            proc_trans_std_out, proc_trans_std_err = proc_trans.communicate()
-            paper_info += proc_trans_std_out.decode('utf-8').rstrip()+'\n'
+            paper_info += trans('Abstract: '+result.summary.replace('\n', ' '), 'en', tgt_lang)
         CLIENT.api_call(api_method='chat.postMessage', json={'channel': post_channel, 'text': paper_info})
-        message += 'paper_info: '+paper_info+'\n'
+        message += '-----\npaper_info: \n'+paper_info+'\n'
     debug_msg('/arxiv_check result:\n' + message)
     return HttpResponse('')
 
