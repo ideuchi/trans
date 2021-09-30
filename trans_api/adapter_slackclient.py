@@ -8,7 +8,7 @@ import hashlib
 SLACK_VERIFICATION_TOKEN = os.environ.get('SLACK_VERIFICATION_TOKEN','')
 SLACK_BOT_TOKEN = os.environ.get('SLACK_BOT_TOKEN','')
 
-from trans_api.trans_util import trans, lang_detect, check_handled_event, debug_msg
+from trans_api.trans_util import trans, lang_detect, is_available_lang_code, check_handled_event, debug_msg
 slack_flag_langs = {
     # Extracted contry-lang pairs that has available lang from https://github.com/slackapi/reacjilator/blob/master/langcode.js
     'ae':'ar','bh':'ar','dz':'ar','eg':'ar','eh':'ar','iq':'ar','jo':'ar','kw':'ar','lb':'ar','ly':'ar','ma':'ar','mr':'ar','om':'ar','ps':'ar','qa':'ar','sa':'ar','sd':'ar','sw':'ar','tn':'ar','ye':'ar',
@@ -53,7 +53,7 @@ def reaction_added(event_data):
     emoji = event['reaction']
     channel = event['item']['channel']
     ts = event['item']['ts']
-    debug_msg('starting to handle reaction_added event. event_data = '+str(event_data))
+    debug_msg('starting to handle reaction_added event. event_id = '+event_id+', emoji = '+emoji)
     # Get translation target language code from received emoji (If received emoji is not in translation target languages, ignore the event)
     tgt_lang = slack_flag_langs.get(emoji.replace('flag-',''))
     if is_available_lang_code(tgt_lang):
