@@ -1,9 +1,6 @@
 from django.conf import settings
 from django.http import HttpResponse
 import os
-import datetime
-import subprocess as sp
-import hashlib
 
 SLACK_VERIFICATION_TOKEN = os.environ.get('SLACK_VERIFICATION_TOKEN','')
 SLACK_BOT_TOKEN = os.environ.get('SLACK_BOT_TOKEN','')

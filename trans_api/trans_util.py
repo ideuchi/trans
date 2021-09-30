@@ -2,6 +2,7 @@ import os
 import datetime
 import pytz
 import subprocess as sp
+import hashlib
 
 
 DEBUG_FILE = 'debug.txt'
