@@ -119,12 +119,12 @@ def arxiv_check(request):
     # Send search result (one message corresponding to one paper)
     for result in arxiv_search.results():
         paper_info = 'Title: '+result.title+'\n'
-        if trans_tgt_lang != '':
+        if trans_tgt_lang != 'none':
             paper_info += trans('Title: '+result.title, 'en', trans_tgt_lang)+'\n'
         paper_info += 'Authors: '+', '.join(list(map(str, result.authors)))+'\n'
         paper_info += 'Published Date: '+result.published.strftime('%Y/%m/%d %H:%M:%S')+'\n'
         paper_info += 'Abstract: '+result.summary.replace('\n', ' ')+'\n'
-        if trans_tgt_lang != '':
+        if trans_tgt_lang != 'none':
             paper_info += trans('Abstract: '+result.summary.replace('\n', ' '), 'en', trans_tgt_lang)+'\n'
         paper_info += 'PDF URL: '+result.pdf_url+'\n'
         CLIENT.api_call(api_method='chat.postMessage', json={'channel': post_channel, 'text': paper_info})

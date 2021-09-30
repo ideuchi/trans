@@ -37,8 +37,8 @@
       "value": "ON or OFF"
     },
     "ARXIV_CHECK_TRANS": {
-      "description": "Translation target language code ('ja' for Japanese), if this value is empty, no translation will be performed",
-      "value": ""
+      "description": "Translation target language code ('ja' for Japanese), if this value is 'none', no translation will be performed",
+      "value": "'none' or a language code (ex. 'ja')"
     }
   },
   "image": "heroku/python"
