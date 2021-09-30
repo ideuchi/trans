@@ -115,7 +115,7 @@ def debug_cat(request):
     if os.path.isfile(file):
         with open(file, 'r') as f:
             message += '\n\n' + file + ' contents:\n' + f.read()
-    debug_msg('/debug_cat result:\n====================\n' + message + '\n====================\n')
+    debug_msg('/debug_cat result:\n====================\n> ' + message.replace('\n', '\n> ') + '\n====================\n')
     return HttpResponse('<pre>' + message + '</pre>')
 
 def debug_ls(request):

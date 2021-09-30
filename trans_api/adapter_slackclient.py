@@ -69,9 +69,9 @@ def reaction_added(event_data):
     debug_msg('src message: '+src_message)
     # Detect src lang
     src_lang = lang_detect(src_message)
-    debug_msg('src_lang: '+src_lang)
     # Translate message
     tgt_message = trans(src_message, src_lang, tgt_lang)
+    debug_msg('tgt_message: '+tgt_message)
     debug_msg('response to reaction_added event:\n  cmd: '+trans_cmd+'\n  res: '+tgt_message)
     if tgt_message != '':
         CLIENT.api_call(api_method='chat.postMessage', json={'channel': channel, 'thread_ts': ts, 'text': tgt_message})
