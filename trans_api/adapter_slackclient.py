@@ -5,6 +5,16 @@ import os
 SLACK_VERIFICATION_TOKEN = os.environ.get('SLACK_VERIFICATION_TOKEN','')
 SLACK_BOT_TOKEN = os.environ.get('SLACK_BOT_TOKEN','')
 
+from pyee import EventEmitter
+from slack_sdk import WebClient
+CLIENT = WebClient(SLACK_BOT_TOKEN)
+
+class SlackEventAdapter(EventEmitter):
+    def __init__(self, verification_token):
+        EventEmitter.__init__(self)
+        self.verification_token = verification_token
+slack_events_adapter = SlackEventAdapter(SLACK_VERIFICATION_TOKEN)
+
 from trans_api.trans_util import trans, lang_detect, is_available_lang_code, is_already_handled_event, debug_msg
 slack_flag_langs = {
     # Extracted contry-lang pairs that has available lang from https://github.com/slackapi/reacjilator/blob/master/langcode.js
@@ -30,17 +40,6 @@ slack_flag_langs = {
     'cn':'zh-CN',
     'hk':'zh-TW','mo':'zh-TW','tw':'zh-TW',
 }
-
-from pyee import EventEmitter
-from slack_sdk import WebClient
-CLIENT = WebClient(SLACK_BOT_TOKEN)
-
-class SlackEventAdapter(EventEmitter):
-    def __init__(self, verification_token):
-        EventEmitter.__init__(self)
-        self.verification_token = verification_token
-
-slack_events_adapter = SlackEventAdapter(SLACK_VERIFICATION_TOKEN)
 
 # Reaction for emoji
 @slack_events_adapter.on('reaction_added')
@@ -71,7 +70,6 @@ def reaction_added(event_data):
     src_lang = lang_detect(src_message)
     # Translate message
     tgt_message = trans(src_message, src_lang, tgt_lang)
-    debug_msg('tgt_message: '+tgt_message)
-    debug_msg('response to reaction_added event:\n  cmd: '+trans_cmd+'\n  res: '+tgt_message)
+    debug_msg('response to reaction_added event:\n  trans_original: '+src_message+'\n  lang_pair: '+src_lang+'-'+tgt_lang+'\n  trans_result: '+tgt_message)
     if tgt_message != '':
         CLIENT.api_call(api_method='chat.postMessage', json={'channel': channel, 'thread_ts': ts, 'text': tgt_message})
