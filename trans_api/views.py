@@ -91,7 +91,7 @@ def arxiv_check(request):
     else:
         only_new_articles = ARXIV_CHECK_ONLY_NEW_ARTICLES
     if only_new_articles == 'ON':
-        ts = time.mktime(datetime.datetime.strptime(dt_now, "%d/%m/%Y").timetuple())
+        ts = time.mktime(dt_now.timetuple())
         message_history = CLIENT.conversations_history(channel=post_channel, inclusive=True, oldest=ts, limit=1)
         debug_msg('message_history:\n' + str(message_history))
         dt_from = datetime.datetime.fromtimestamp(int(message_history['messages'][0]['ts'])+1)
