@@ -8,7 +8,8 @@ import pytz
 import subprocess as sp
 import arxiv
 
-from .trans_util import trans, SLACK_VERIFICATION_TOKEN, SLACK_BOT_TOKEN
+import .trans_util
+from .trans_util import SLACK_VERIFICATION_TOKEN, SLACK_BOT_TOKEN
 from .adapter_slackclient import slack_events_adapter, CLIENT
 
 ARXIV_CHECK_KEYWORD = os.environ.get('ARXIV_CHECK_KEYWORD','')
