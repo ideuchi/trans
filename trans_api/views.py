@@ -8,6 +8,7 @@ import datetime
 import pytz
 import subprocess as sp
 import arxiv
+import hashlib
 
 from trans_api.trans_util import trans, debug_msg, DEBUG_FILE
 from .adapter_slackclient import slack_events_adapter, CLIENT, SLACK_VERIFICATION_TOKEN
