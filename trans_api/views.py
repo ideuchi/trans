@@ -121,15 +121,15 @@ def arxiv_check(request):
     for result in arxiv_search.results():
         paper_info = 'Title: '+result.title+'\n'
         if trans_tgt_lang != 'none':
-            paper_info += trans('Title: '+result.title, 'en', trans_tgt_lang)+'\n'
+            paper_info_rep = trans('Title: '+result.title, 'en', trans_tgt_lang)+'\n'
         paper_info += 'Authors: '+', '.join(list(map(str, result.authors)))+'\n'
         paper_info += 'Abstract: '+result.summary.replace('\n', ' ')+'\n'
         if trans_tgt_lang != 'none':
-            paper_info += trans('Abstract: '+result.summary.replace('\n', ' '), 'en', trans_tgt_lang)+'\n'
+            paper_info_rep += trans('Abstract: '+result.summary.replace('\n', ' '), 'en', trans_tgt_lang)+'\n'
         paper_info += 'PDF URL: '+result.pdf_url+'\n'
         paper_info += 'Published Date: '+result.published.strftime('%Y/%m/%d %H:%M:%S')+'\n'
-        CLIENT.api_call(api_method='chat.postMessage', json={'channel': post_channel, 'text': paper_info})
-        message += '-----\npaper_info: \n'+paper_info+'\n'
+        post_res = CLIENT.api_call(api_method='chat.postMessage', json={'channel': post_channel, 'text': paper_info})
+        message += '-----\npaper_info: \n'+paper_info+'\npost_res'+str(post_res)
     debug_msg('/arxiv_check result:\n' + message)
     return HttpResponse('')
 
