@@ -58,10 +58,10 @@ def slack_events(request, *args, **kwargs):  # cf. https://api.slack.com/events/
         # Verify the request token
         request_token = event_data['token']
         if request_token != SLACK_VERIFICATION_TOKEN:
-            slack_events_adapter.emit('error', 'invalid verification token')
             message = 'Request contains invalid Slack verification token: %s\n' \
                       'Slack adapter has: %s' % (request_token, SLACK_VERIFICATION_TOKEN)
             debug_msg('\n'+message)
+            slack_events_adapter.emit('error', 'invalid verification token')
             raise PermissionDenied(message)
         event_type = event_data['event']['type']
         debug_msg('dispatched to slack_events_adapter.')
