@@ -131,7 +131,7 @@ def arxiv_check(request):
         post_res = CLIENT.api_call(api_method='chat.postMessage', json={'channel': post_channel, 'text': paper_info})
         debug_msg('arXiv english information post_res: '+str(post_res))
         CLIENT.api_call(api_method='chat.postMessage', json={'channel': post_channel, 'text': paper_info_rep, 'thread_ts': post_res['ts'] }
-        message += '-----\npaper_info_en: \n'+paper_info+'\npaper_info_'+trans_tgt_lang+': '+paper_info_rep'\n'
+        message += '-----\npaper_info_en: \n'+paper_info+'\npaper_info_'+trans_tgt_lang+': '+paper_info_rep+'\n'
     debug_msg('/arxiv_check result:\n' + message)
     return HttpResponse('')
 
