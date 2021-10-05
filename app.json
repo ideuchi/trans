@@ -26,7 +26,7 @@
     },
     "ARXIV_CHECK_CHANNEL": {
       "description": "Channel ID for posting paper from arXiv",
-      "value": "arxiv"
+      "value": "arxiv channel ID (Cxxxxxxxx)"
     },
     "ARXIV_CHECK_KEYWORD": {
       "description": "Keyword for searching paper from arXiv",

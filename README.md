@@ -128,7 +128,9 @@ translating "/path/to/sample_dir/xxxxxxx" to "/path/to/sample_dir_en/xxxxxxx"
 ```
 
 
-## 応用例：Slackメッセージの翻訳
+## 応用例：Slackメッセージの翻訳／arXivから論文情報取得し投稿、返信に翻訳結果を追加
+
+### Slackメッセージの翻訳
 
 以下の手順で、翻訳支援コマンドツール(trans)を利用してSlackに投稿されたメッセージを翻訳するSlackアプリを作成できます。  
 Slackアプリ作成に必要なファイルも本リポジトリに入れてあります。  
@@ -199,9 +201,11 @@ Slackアプリ（のボットユーザー）を追加したチャンネルに、
 
 10. 【動作確認】Slackアプリ（のボットユーザー）を追加したチャンネルにメッセージを投稿し、そのメッセージに国旗アイコンのリアクションを追加します。  
 メッセージの返信（スレッド）に、Slackアプリ（のボットユーザー）から翻訳結果が書き込まれれば正常動作しています。  
+Herokuのdynoが生存している間は翻訳言語方向とメッセージ内容が重複した投稿を抑止する機能を追加したため、同じメッセージを何度も翻訳しても結果は返りません。
 
-11. 正常動作していない場合は、ブラウザからHerokuアプリのURL https://[heroku-app-name].herokuapp.com/debug_cat/ にアクセスすると、ログが参照できます。  
-あまり時間を空けるとログは消えてしまうので注意してください。  
+11. 正常動作していない場合など、翻訳アプリのログを確認したい場合は、ブラウザからHerokuアプリのURL https://[heroku-app-name].herokuapp.com/debug_cat/ にアクセスしてください。  
+テキスト形式のログが参照できます。  
+Herokuのdynoは最終リクエストから30分程度で、消えてしまいます。その際にログも消えてしまうので注意してください。  
 
 ログを確認する場合、処理の流れは以下のようになっています。  
 
@@ -219,6 +223,39 @@ i. "response to reaction_added event:
     cmd: ./trans text "Hello." generalNT it en | ./trans text "" generalNT en ja  
     res: こんにちは。"（呼び出した翻訳支援コマンドと、翻訳結果を記録。）
 ~~~~
+
+
+### arXivから論文情報取得し投稿、返信に翻訳結果を追加
+
+URL(https://[HerokuアプリURL]/arxiv_check/)にアクセスすることで、arXivから論文情報を取得してくれる機能です（一日に一度を想定）。  
+URLへのアクセスは、他の
+指定した言語への翻訳結果を返信メッセージとして投稿してくれます。
+
+1. Slackアプリの設定は「Slackメッセージの翻訳」の1～5と共通です。
+
+2. デプロイ時のパラメタは以下のとおりです。
+~~~~
+ARXIV_CHECK_CHANNEL                 ：arXivから取得した論文情報の投稿先（チャンネルID）
+ARXIV_CHECK_KEYWORD                 ：arXivから取得する論文の検索キーワード
+ARXIV_CHECK_FROM_DAYS_BEFORE        ：何日前以降の論文を検索対象にするか（デフォルト値は'7'）
+ARXIV_CHECK_TO_DAYS_BEFORE          ：何日前以前の論文を検索対象にするか（デフォルト値は'6'）
+ARXIV_CHECK_AVOID_DUPLICATED_POSTING：短時間での重複投稿を避けるためのフラグ（デフォルト値は'ON'、Herokuのdynoが生存している間は重複投稿しなくなります）
+ARXIV_CHECK_TRANS                   ：翻訳先言語
+~~~~
+
+3. デプロイ時のパラメタはURLパラメタで上書きできます。指定しなかったパラメタは、デプロイ時のパラメタが使われます。複数チャンネルへの投稿、複数キーワードでの検索を行いたい場合は、こちらを活用と便利です。
+~~~~
+post_channel            ：arXivから取得した論文情報の投稿先（チャンネルID）
+keyword                 ：arXivから取得する論文の検索キーワード
+dt_from                 ：何日前以降の論文を検索対象にするか
+dt_to                   ：何日前以前の論文を検索対象にするか
+avoid_duplicated_posting：短時間での重複投稿を避けるためのフラグ
+trans_tgt_lang          ：翻訳先言語
+
+https://[HerokuアプリURL]/arxiv_check/?post_channel=Cxxxxxxxx&keyword=deep learning&trans_tgt_lang=ja
+のように指定
+~~~~
+
 
 
 ### Slackアプリ作成時の参考にさせていただいたサイト・プログラム：  

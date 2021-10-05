@@ -90,12 +90,7 @@ def arxiv_check(request):
         dt_from = dt_now - datetime.timedelta(days=from_days_before)
     else:
         dt_from = dt_now - datetime.timedelta(days=int(ARXIV_CHECK_FROM_DAYS_BEFORE))
-    # Option to avoid duplicated posting
-    if 'avoid_duplicated_posting' in request.GET:
-        avoid_duplicated_posting = request.GET.get('avoid_duplicated_posting')
-    else:
-        avoid_duplicated_posting = ARXIV_CHECK_AVOID_DUPLICATED_POSTING
-    # OPTION FOR DEBUGGING: set "to date" if it exists, but latest datetime is used default to get latest information
+    # To date of searching papers
     if 'to_days_before' in request.GET:
         to_days_before = int(request.GET.get('to_days_before'))
         dt_to = dt_now - datetime.timedelta(days=to_days_before)
@@ -103,6 +98,11 @@ def arxiv_check(request):
         dt_to = dt_now - datetime.timedelta(days=int(ARXIV_CHECK_TO_DAYS_BEFORE))
     else:
         dt_to = dt_now
+    # Option to avoid duplicated posting
+    if 'avoid_duplicated_posting' in request.GET:
+        avoid_duplicated_posting = request.GET.get('avoid_duplicated_posting')
+    else:
+        avoid_duplicated_posting = ARXIV_CHECK_AVOID_DUPLICATED_POSTING
     # Building searching query and getting search result
     arxiv_check_query = 'abs:"'+keyword+'" AND submittedDate:[{} TO {}]'.format(dt_from.strftime('%Y%m%d%H%M%S'), dt_to.strftime('%Y%m%d%H%M%S'))
     message += 'arxiv_check_query: '+arxiv_check_query
