@@ -26,15 +26,23 @@
     },
     "ARXIV_CHECK_CHANNEL": {
       "description": "Channel ID for posting paper from arXiv",
-      "value": "xxxxxxxxxxx"
+      "value": "arxiv"
     },
     "ARXIV_CHECK_KEYWORD": {
       "description": "Keyword for searching paper from arXiv",
       "value": "technical term (ex. 'neural machine translation')"
     },
     "ARXIV_CHECK_FROM_DAYS_BEFORE": {
-      "description": "Search start date (in days from now)",
+      "description": "Searching start date (in days from now)",
       "value": "7"
+    },
+    "ARXIV_CHECK_TO_DAYS_BEFORE": {
+      "description": "Searching end date (in days from now)",
+      "value": "6"
+    },
+    "ARXIV_CHECK_AVOID_DUPLICATED_POSTING": {
+      "description": "Suppress duplicated posting (while heroku dyno is alive)",
+      "value": "ON"
     },
     "ARXIV_CHECK_TRANS": {
       "description": "Translation target language code ('ja' for Japanese), if this value is 'none', no translation will be performed",

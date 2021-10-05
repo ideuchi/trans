@@ -16,11 +16,9 @@ from .adapter_slackclient import slack_events_adapter, CLIENT, SLACK_VERIFICATIO
 ARXIV_CHECK_CHANNEL = os.environ.get('ARXIV_CHECK_CHANNEL','arxiv')
 ARXIV_CHECK_KEYWORD = os.environ.get('ARXIV_CHECK_KEYWORD','machine translation')
 ARXIV_CHECK_FROM_DAYS_BEFORE = os.environ.get('ARXIV_CHECK_FROM_DAYS_BEFORE','7')
-ARXIV_CHECK_ONLY_NEW_ARTICLES = os.environ.get('ARXIV_CHECK_ONLY_NEW_ARTICLES','OFF')
+ARXIV_CHECK_TO_DAYS_BEFORE = os.environ.get('ARXIV_CHECK_TO_DAYS_BEFORE','6')
+ARXIV_CHECK_AVOID_DUPLICATED_POSTING = os.environ.get('ARXIV_CHECK_AVOID_DUPLICATED_POSTING','ON')
 ARXIV_CHECK_TRANS = os.environ.get('ARXIV_CHECK_TRANS','')  # '' means no translation
-
-# Hidden options
-ARXIV_CHECK_TO_DAYS_BEFORE = os.environ.get('ARXIV_CHECK_TO_DAYS_BEFORE','')
 
 # Create your views here.
 
@@ -70,6 +68,8 @@ def slack_events(request, *args, **kwargs):  # cf. https://api.slack.com/events/
     # default case
     return HttpResponse('')
 
+ARXIV_MSG_HASHED_FILE = 'arxiv_msg_hashed.txt'
+
 def arxiv_check(request):
     message = '/arxiv_check called.\n'
     dt_now = datetime.datetime.now(pytz.timezone('Asia/Tokyo'))
@@ -89,17 +89,11 @@ def arxiv_check(request):
         dt_from = dt_now - datetime.timedelta(days=from_days_before)
     else:
         dt_from = dt_now - datetime.timedelta(days=int(ARXIV_CHECK_FROM_DAYS_BEFORE))
-    # Option to set "from date" to oldest posting
-    if 'only_new_articles' in request.GET:
-        only_new_articles = request.GET.get('only_new_articles')
+    # Option to avoid duplicated posting
+    if 'avoid_duplicated_posting' in request.GET:
+        avoid_duplicated_posting = request.GET.get('avoid_duplicated_posting')
     else:
-        only_new_articles = ARXIV_CHECK_ONLY_NEW_ARTICLES
-    if only_new_articles == 'ON':
-        # TODO: Getting date of latest paper after 'Published Date: ', because paper from arXiv API is not realtime
-        ts = time.mktime(dt_now.timetuple())
-        message_history = CLIENT.conversations_history(channel=post_channel, inclusive=True, oldest=ts, limit=1)
-        debug_msg('message_history:\n' + str(message_history))
-        dt_from = datetime.datetime.fromtimestamp(int(float(message_history['oldest']))+1)
+        avoid_duplicated_posting = ARXIV_CHECK_AVOID_DUPLICATED_POSTING
     # OPTION FOR DEBUGGING: set "to date" if it exists, but latest datetime is used default to get latest information
     if 'to_days_before' in request.GET:
         to_days_before = int(request.GET.get('to_days_before'))
@@ -128,6 +122,19 @@ def arxiv_check(request):
             paper_info_rep += trans('Abstract: '+result.summary.replace('\n', ' '), 'en', trans_tgt_lang)+'\n'
         paper_info += 'PDF URL: '+result.pdf_url+'\n'
         paper_info += 'Published Date: '+result.published.strftime('%Y/%m/%d %H:%M:%S')+'\n'
+        # If the same paper_info/channel is already posted recently (recorded in ARXIV_MSG_HASHED_FILE), ignore event
+        if avoid_duplicated_posting == 'ON':
+            msg_info = 'post_channel: '+post_channel+'\tpaper_info_digest: '+hashlib.sha224(paper_info.encode("utf-8")).hexdigest()
+            debug_msg('msg_info created: '+msg_info)
+            if os.path.isfile(ARXIV_MSG_HASHED_FILE):
+                with open(ARXIV_MSG_HASHED_FILE, 'r') as f:
+                    lines = f.readlines()
+                    if msg_info+'\n' in lines:
+                        debug_msg('This paper_info/channel is already sent: '+msg_info)
+                        return HttpResponse('')
+            with open(ARXIV_MSG_HASHED_FILE, 'a') as f:
+                debug_msg('new paper_info/channel to send: '+msg_info)
+                print(msg_info, file=f)
         post_res = CLIENT.api_call(api_method='chat.postMessage', json={'channel': post_channel, 'text': paper_info})
         debug_msg('arXiv english information post_res: '+str(post_res))
         CLIENT.api_call(api_method='chat.postMessage', json={'channel': post_channel, 'text': paper_info_rep, 'thread_ts': post_res['ts'] })
