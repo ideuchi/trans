@@ -99,7 +99,7 @@ def arxiv_check(request):
         to_days_before = int(request.GET.get('to_days_before'))
         dt_to = dt_now - datetime.timedelta(days=to_days_before)
     elif ARXIV_CHECK_TO_DAYS_BEFORE != '':
-        dt_to = dt_now - datetime.timedelta(days=ARXIV_CHECK_TO_DAYS_BEFORE)
+        dt_to = dt_now - datetime.timedelta(days=int(ARXIV_CHECK_TO_DAYS_BEFORE))
     else:
         dt_to = dt_now
     # Building searching query and getting search result
@@ -125,7 +125,7 @@ def arxiv_check(request):
         # If the same paper_info/channel is already posted recently (recorded in ARXIV_MSG_HASHED_FILE), ignore event
         if avoid_duplicated_posting == 'ON':
             msg_info = 'post_channel: '+post_channel+'\tpaper_info_digest: '+hashlib.sha224(paper_info.encode("utf-8")).hexdigest()
-            debug_msg('msg_info created: '+msg_info)
+            debug_msg('paper_info_digest created: '+msg_info)
             if os.path.isfile(ARXIV_MSG_HASHED_FILE):
                 with open(ARXIV_MSG_HASHED_FILE, 'r') as f:
                     lines = f.readlines()
