@@ -252,7 +252,7 @@ dt_to                   ：何日前以前の論文を検索対象にするか
 avoid_duplicated_posting：短時間での重複投稿を避けるためのフラグ
 trans_tgt_lang          ：翻訳先言語
 
-https://[HerokuアプリURL]/arxiv_check/?post_channel=Cxxxxxxxx&keyword=deep learning&trans_tgt_lang=ja
+https://[heroku-app-name].herokuapp.com/arxiv_check/?post_channel=Cxxxxxxxx&keyword=deep learning&trans_tgt_lang=ja
 のように指定
 ~~~~
 
