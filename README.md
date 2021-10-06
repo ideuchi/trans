@@ -227,7 +227,7 @@ i. "response to reaction_added event:
 
 ### arXivから論文情報取得し投稿、返信に翻訳結果を追加
 
-URL(https://[HerokuアプリURL]/arxiv_check/)にアクセスすることで、arXivから論文情報を取得してくれる機能です（一日に一度を想定）。  
+URL(https://[heroku-app-name].herokuapp.com/arxiv_check/)にアクセスすることで、arXivから論文情報を取得してくれる機能です（一日に一度を想定）。  
 URLへのアクセスは、他の
 指定した言語への翻訳結果を返信メッセージとして投稿してくれます。
 
