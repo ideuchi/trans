@@ -227,9 +227,8 @@ i. "response to reaction_added event:
 
 ### arXivから論文情報取得し投稿、返信に翻訳結果を追加
 
-URL(https://[heroku-app-name].herokuapp.com/arxiv_check/)にアクセスすることで、arXivから論文情報を取得してくれる機能です（一日に一度を想定）。  
-URLへのアクセスは、他の
-指定した言語への翻訳結果を返信メッセージとして投稿してくれます。
+URL(https://[heroku-app-name].herokuapp.com/arxiv_check/)にアクセスすることで、arXivから論文情報（英語）を取得してくれる機能です（一日に一度、週に一度などを想定）。  
+デプロイ時に指定したパラメタ、もしくはURLにアクセスした際のパラメタに応じて、英語から指定した言語への翻訳結果を返信メッセージとして投稿してくれます。
 
 1. Slackアプリの設定は「Slackメッセージの翻訳」の1～5と共通です。
 
@@ -240,7 +239,7 @@ ARXIV_CHECK_KEYWORD                 ：arXivから取得する論文の検索キ
 ARXIV_CHECK_FROM_DAYS_BEFORE        ：何日前以降の論文を検索対象にするか（デフォルト値は'7'）
 ARXIV_CHECK_TO_DAYS_BEFORE          ：何日前以前の論文を検索対象にするか（デフォルト値は'6'）
 ARXIV_CHECK_AVOID_DUPLICATED_POSTING：短時間での重複投稿を避けるためのフラグ（デフォルト値は'ON'、Herokuのdynoが生存している間は重複投稿しなくなります）
-ARXIV_CHECK_TRANS                   ：翻訳先言語
+ARXIV_CHECK_TRANS                   ：翻訳先言語（翻訳不要な場合は'none'、日本語に翻訳する場合は'ja'）
 ~~~~
 
 3. デプロイ時のパラメタはURLパラメタで上書きできます。指定しなかったパラメタは、デプロイ時のパラメタが使われます。複数チャンネルへの投稿、複数キーワードでの検索を行いたい場合は、こちらを活用と便利です。
@@ -252,8 +251,9 @@ dt_to                   ：何日前以前の論文を検索対象にするか
 avoid_duplicated_posting：短時間での重複投稿を避けるためのフラグ
 trans_tgt_lang          ：翻訳先言語
 
+例えば、
 https://[heroku-app-name].herokuapp.com/arxiv_check/?post_channel=Cxxxxxxxx&keyword=deep learning&trans_tgt_lang=ja
-のように指定
+のように指定します。
 ~~~~
 
 
@@ -267,6 +267,12 @@ https://github.com/j-devel/django-slack-events-api
 https://qiita.com/kimihiro_n/items/86e0a9e619720e57ecd8
 - About Python django  
 https://www.sejuku.net/blog/9014
+
+
+## TODO
+
+本Githubに格納されているプログラムは、デバッグのためにDjangoのデバッグフラグがONになっている他、Herokuアプリデバッグ用のURLが有効になっています。
+最終的にはデプロイ時のパラメタにデバッグオプションを追加しようと考えていますが、現段階で本格的に運用する場合は、herokuコマンド等を利用し、不要なデバッグ機能は無効化してください。
 
 
 ## 留意事項(Notice)
