@@ -128,9 +128,9 @@ translating "/path/to/sample_dir/xxxxxxx" to "/path/to/sample_dir_en/xxxxxxx"
 ```
 
 
-## 応用例：Slackメッセージの翻訳／arXivから論文情報取得し投稿、返信に翻訳結果を追加
+## 応用例：Slackメッセージの翻訳／arXivから論文情報取得し投稿、返信に翻訳結果を追加 (Sample Applications: Slack message translation / Posting paper information from arXiv and translation in reply)
 
-### Slackメッセージの翻訳
+### Slackメッセージの翻訳(Slack message translation)
 
 以下の手順で、翻訳支援コマンドツール(trans)を利用してSlackに投稿されたメッセージを翻訳するSlackアプリを作成できます。  
 Slackアプリ作成に必要なファイルも本リポジトリに入れてあります。  
@@ -225,7 +225,7 @@ i. "response to reaction_added event:
 ~~~~
 
 
-### arXivから論文情報取得し投稿、返信に翻訳結果を追加
+### arXivから論文情報取得し投稿、返信に翻訳結果を追加(Posting paper information from arXiv and translation in reply)
 
 URL(https://[heroku-app-name].herokuapp.com/arxiv_check/)にアクセスすることで、arXivから論文情報（英語）を取得してくれる機能です（一日に一度、週に一度などを想定）。  
 デプロイ時に指定したパラメタ、もしくはURLにアクセスした際のパラメタに応じて、英語から指定した言語への翻訳結果を返信メッセージとして投稿してくれます。
