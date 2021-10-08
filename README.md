@@ -246,13 +246,13 @@ ARXIV_CHECK_TRANS                   ：翻訳先言語（翻訳不要な場合�
 ~~~~
 post_channel            ：arXivから取得した論文情報の投稿先（チャンネルID）
 keyword                 ：arXivから取得する論文の検索キーワード
-dt_from                 ：何日前以降の論文を検索対象にするか
-dt_to                   ：何日前以前の論文を検索対象にするか
+from_days_before        ：何日前以降の論文を検索対象にするか
+to_days_before          ：何日前以前の論文を検索対象にするか
 avoid_duplicated_posting：短時間での重複投稿を避けるためのフラグ
 trans_tgt_lang          ：翻訳先言語
 
 例えば、
-https://[heroku-app-name].herokuapp.com/arxiv_check/?post_channel=Cxxxxxxxx&keyword=deep learning&trans_tgt_lang=ja
+https://[heroku-app-name].herokuapp.com/arxiv_check/?post_channel=Cxxxxxxxx&keyword=deep%20learning&trans_tgt_lang=ja
 のように指定します。
 ~~~~
 
