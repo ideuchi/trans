@@ -269,17 +269,19 @@ https://qiita.com/kimihiro_n/items/86e0a9e619720e57ecd8
 https://www.sejuku.net/blog/9014
 
 
-## TODO
-
-本Githubに格納されているプログラムは、デバッグのためにDjangoのデバッグフラグがONになっている他、Herokuアプリデバッグ用のURLが有効になっています。
-最終的にはデプロイ時のパラメタにデバッグオプションを追加しようと考えていますが、現段階で本格的に運用する場合は、herokuコマンド等を利用し、不要なデバッグ機能は無効化してください。
-
 
 ## 留意事項(Notice)
 
 本プログラムから、「みんなの自動翻訳@TexTra」のサービスを利用する場合は、ユーザー登録の上、下記の利用規約を守って使ってください。  
-みんなの自動翻訳@TexTra　利用規約　https://mt-auto-minhon-mlt.ucri.jgn-x.jp/content/policy/
+みんなの自動翻訳@TexTra　利用規約　https://mt-auto-minhon-mlt.ucri.jgn-x.jp/content/policy/  
 
 When you use "みんなの自動翻訳@TexTra" through this program, you should first register your user name and password,   
-then, you should observe its "Term of Use" (https://mt-auto-minhon-mlt.ucri.jgn-x.jp/content/policy/).
+then, you should observe its "Term of Use" (https://mt-auto-minhon-mlt.ucri.jgn-x.jp/content/policy/).   
+
+
+本Githubに格納されている応用例のプログラムでは、デバッグのためにDjangoのデバッグフラグがONになっている他、Herokuアプリデバッグ用のURLが有効になっています。  
+最終的にはデプロイ時のパラメタにデバッグオプションを追加して、切替可能にしようと考えていますが、現状のソースで本格的に運用する場合は、herokuコマンド等を利用し、不要なデバッグ機能を無効化してください。  
+
+The sample application programs in this Github include debug settings, such as debug flag of Django and debug URL for Heroku applications.  
+There's a plan to add debug option for deployment and make controlable to switch debug settings, but if you would like to start practical use with these programs, edit debug settings before use.  
 
