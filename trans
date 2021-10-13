@@ -20,7 +20,7 @@ trans_dir=$(cd $(dirname $0); pwd)
 if [ -p /dev/stdin ]; then src=`cat -`; fi
 
 
-## Explanation of I/F
+## Explanation of usage
 if [ "${src}" == "" ] ; then
   echo "Usage: trans [kind] 'source text' [engine] [source language] [target language]"
   echo "       [kind] can be selected from 'text' 'file' 'dir'"

@@ -1,20 +1,25 @@
 ﻿{
   "name": "trans Slack Bot demo",
-  "description": "A translation bot for Slack that translates a message when a user reacted with an emoji (The specifications are based on reacjilator: https://github.com/slackAPI/reacjilator)",
+  "description": "A translation bot for Slack that translates a message when a user reacted with an emoji (The specifications are based on reacjilator: https://github.com/slackAPI/reacjilator). This bot also gather paper information from arXiv with translation.",
   "repository": "https://github.com/ideuchi/trans",
   "keywords": ["trans", "slack API", "bot", "TexTra", "arXiv"],
   "env": {
-    "NAME": {
-      "description": "TexTra user name",
+    "TEXTRA_NAME": {
+      "description": "TexTra userID, see https://mt-auto-minhon-mlt.ucri.jgn-x.jp/content/setting/user/edit/ after login",
       "value": "xxxxxxxx"
     },
-    "KEY": {
-      "description": "TexTra key",
+    "TEXTRA_KEY": {
+      "description": "TexTra API key, see https://mt-auto-minhon-mlt.ucri.jgn-x.jp/content/setting/user/edit/ after login",
       "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     },
-    "SECRET": {
-      "description": "TexTra secret",
+    "TEXTRA_SECRET": {
+      "description": "TexTra API secret, see https://mt-auto-minhon-mlt.ucri.jgn-x.jp/content/setting/user/edit/ after login",
       "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    },
+    "TEXTRA_CUSTOME_ENGINE": {
+      "description": "Custome translation engine for specific lang pair, enter '[src_lang]_[tgt_lang],[engine_name]' with a pipe as delimiter for custome engines (ex. 'en_ja,c-xxxx|ja_en,c-xxxx')",
+      "value": ""
+      "required": false
     },
     "SLACK_BOT_TOKEN": {
       "description": "Slack Bot Token",
@@ -25,28 +30,34 @@
       "value": "xxxxxxxxxxxxxxxxxxxxxxxx"
     },
     "ARXIV_CHECK_CHANNEL": {
-      "description": "Channel ID for posting paper from arXiv",
-      "value": "arxiv channel ID (Cxxxxxxxx)"
+      "description": "Channel ID for posting paper from arXiv (ex. 'Cxxxxxxxx'), you can overwrite this value by URL parameter 'post_channel'",
+      "value": ""
+      "required": false
     },
     "ARXIV_CHECK_KEYWORD": {
-      "description": "Keyword for searching paper from arXiv",
-      "value": "technical term (ex. 'neural machine translation')"
+      "description": "Keyword for searching paper from arXiv (ex. 'neural machine translation'), you can overwrite this value by URL parameter 'keyword'",
+      "value": ""
+      "required": false
     },
     "ARXIV_CHECK_FROM_DAYS_BEFORE": {
-      "description": "Searching start date (in days from now)",
-      "value": "7"
+      "description": "Searching start date (in days from now, default value is '7'), you can overwrite this value by URL parameter 'from_days_before'",
+      "value": ""
+      "required": false
     },
     "ARXIV_CHECK_TO_DAYS_BEFORE": {
-      "description": "Searching end date (in days from now)",
-      "value": "6"
+      "description": "Searching end date (in days from now, default value is '6'), you can overwrite this value by URL parameter 'to_days_before'",
+      "value": ""
+      "required": false
     },
     "ARXIV_CHECK_AVOID_DUPLICATED_POSTING": {
-      "description": "Suppress duplicated posting (while heroku dyno is alive)",
-      "value": "ON"
+      "description": "Suppress duplicated posting (while heroku dyno is alive, default value is 'ON'), you can overwrite this value by URL parameter 'avoid_duplicated_posting'",
+      "value": ""
+      "required": false
     },
     "ARXIV_CHECK_TRANS": {
-      "description": "Translation target language code ('ja' for Japanese), if this value is 'none', no translation will be performed",
-      "value": "'none' or a language code (ex. 'ja')"
+      "description": "Translation target language code ('ja' for Japanese, 'none' for no translation, default value is 'ja'), you can overwrite this value by URL parameter 'trans_tgt_lang'",
+      "value": ""
+      "required": false
     }
   },
   "image": "heroku/python"

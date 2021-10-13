@@ -57,6 +57,14 @@ def lang_detect(src_message):
         return 'en'  # if lang_detect didn't work, treat source message as en
     return src_lang
 
+TEXTRA_CUSTOME_ENGINE = 'pt-BR_ja,voicetraNT|ja_pt-BR,voicetraNT|'+os.environ.get('TEXTRA_CUSTOME_ENGINE','')  # custom translation engine for specific lang pair
+def get_engine(lang_pair):
+    engine = 'generalNT'
+    custom_engine_start = TEXTRA_CUSTOME_ENGINE[TEXTRA_CUSTOME_ENGINE.rfind(lang_pair):]
+    if custom_engine_start >= 0:
+        engine = custom_engine_start.split('|')[0].split(',')[1]
+    return engine
+
 def trans(src_message, src_lang, tgt_lang, record_history=True):
     # If the same message/lang-pair is already translated recently (recorded in TRANSLATED_MSG_HASHED_FILE), ignore event
     msg_info = 'lang_pair: '+src_lang+'-'+tgt_lang+'\tmessage_digest: '+hashlib.sha224(src_message.encode("utf-8")).hexdigest()
@@ -76,23 +84,14 @@ def trans(src_message, src_lang, tgt_lang, record_history=True):
     trans_cmd = ''
     if len(trans_pairs) == 0:    # There's no translation pair
         debug_msg('(trans_util) trans pairs not found: '+src_lang+' to '+tgt_lang+'\nuse trans pair en to '+tgt_lang)
-        if tgt_lang == 'pt-BR':
-            trans_cmd = './trans text "'+src_message+'" voicetraNT en '+tgt_lang
-        else:
-            trans_cmd = './trans text "'+src_message+'" generalNT en '+tgt_lang
+        trans_cmd = './trans text "'+src_message+'" '+get_engine('en_'+tgt_lang)+' en '+tgt_lang
     else:
         for i, pair in enumerate(trans_pairs):
             src_lang, tgt_lang = pair.split('_')
             if i == 0:
-                if src_lang == 'pt-BR' or tgt_lang == 'pt-BR':
-                    trans_cmd = './trans text "'+src_message+'" voicetraNT '+src_lang+' '+tgt_lang
-                else:
-                    trans_cmd = './trans text "'+src_message+'" generalNT '+src_lang+' '+tgt_lang
+                trans_cmd = './trans text "'+src_message+'" '+get_engine(pair)+' '+src_lang+' '+tgt_lang
             else:
-                if src_lang == 'pt-BR' or tgt_lang == 'pt-BR':
-                    trans_cmd += ' | ./trans text "" voicetraNT '+src_lang+' '+tgt_lang
-                else:
-                    trans_cmd += ' | ./trans text "" generalNT '+src_lang+' '+tgt_lang
+                trans_cmd = ' | ./trans text "'+src_message+'" '+get_engine(pair)+' '+src_lang+' '+tgt_lang
     proc_trans = sp.Popen(trans_cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
     proc_trans_std_out, proc_trans_std_err = proc_trans.communicate()
     tgt_message = proc_trans_std_out.decode('utf-8').rstrip()

@@ -1,6 +1,6 @@
 ﻿# -*- coding: utf-8 -*-
 """
-Python3 OAuthRequest Module for NICT translation API
+Python3 OAuthRequest Module for NICT TexTra translation API
   prerequisites:
     creating account via the following URL:
       https://mt-auto-minhon-mlt.ucri.jgn-x.jp/content/register/
