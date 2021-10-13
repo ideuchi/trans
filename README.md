@@ -250,11 +250,13 @@ post_channel            ：arXivから取得した論文情報の投稿先（チ
 keyword                 ：arXivから取得する論文の検索キーワード
 from_days_before        ：何日前以降の論文を検索対象にするか
 to_days_before          ：何日前以前の論文を検索対象にするか
-avoid_duplicated_posting：短時間での重複投稿を避けるためのフラグ
+max_paper_num           ：最大何本の論文を取得するか
+avoid_duplicated_posting：短時間で同じ論文の取得を避けるためのフラグ
 trans_tgt_lang          ：翻訳先言語
+max_trans_num           ：最大何本の論文を翻訳するか
 
 例えば、
-https://[heroku-app-name].herokuapp.com/arxiv_check/?post_channel=Cxxxxxxxx&keyword=deep%20learning&trans_tgt_lang=ja
+https://[heroku-app-name].herokuapp.com/arxiv_check/?post_channel=Cxxxxxxxx&keyword=deep%20learning&trans_tgt_lang=ja&max_paper_num=3
 のように指定します。
 ~~~~
 
