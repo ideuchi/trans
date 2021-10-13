@@ -61,7 +61,7 @@ TEXTRA_CUSTOME_ENGINE = 'pt-BR_ja,voicetraNT|ja_pt-BR,voicetraNT|'+os.environ.ge
 def get_engine(lang_pair):
     debug_msg('(trans_util) getting a engine for '+lang_pair+' from '+TEXTRA_CUSTOME_ENGINE)
     engine = 'generalNT'
-    custom_engine_start = TEXTRA_CUSTOME_ENGINE[TEXTRA_CUSTOME_ENGINE.rfind(lang_pair):]
+    custom_engine_start = TEXTRA_CUSTOME_ENGINE[-TEXTRA_CUSTOME_ENGINE.rfind(lang_pair):]
     if custom_engine_start >= 0:
         engine = custom_engine_start.split('|')[0].split(',')[1]
     return engine
