@@ -17,7 +17,7 @@
       "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     },
     "TEXTRA_CUSTOME_ENGINE": {
-      "description": "Custome translation engine for specific lang pair, enter '[src_lang]_[tgt_lang],[engine_name]' with a pipe as delimiter for custome engines (ex. 'en_ja,c-xxxx|ja_en,c-xxxx')",
+      "description": "Custome translation engine for specific lang pair, enter '[src_lang]_[tgt_lang],[engine_name]' with a pipe as delimiter for custome engines (ex. 'en_ja,c-xxxx|ja_en,c-xxxx'), USE '_' FOR LANGUAGE PAIR DELIMITER",
       "value": "",
       "required": false
     },
