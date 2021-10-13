@@ -18,7 +18,7 @@
     },
     "TEXTRA_CUSTOME_ENGINE": {
       "description": "Custome translation engine for specific lang pair, enter '[src_lang]_[tgt_lang],[engine_name]' with a pipe as delimiter for custome engines (ex. 'en_ja,c-xxxx|ja_en,c-xxxx')",
-      "value": ""
+      "value": "",
       "required": "false"
     },
     "SLACK_BOT_TOKEN": {
@@ -31,32 +31,32 @@
     },
     "ARXIV_CHECK_CHANNEL": {
       "description": "Channel ID for posting paper from arXiv (ex. 'Cxxxxxxxx'), you can overwrite this value by URL parameter 'post_channel'",
-      "value": ""
+      "value": "",
       "required": "false"
     },
     "ARXIV_CHECK_KEYWORD": {
       "description": "Keyword for searching paper from arXiv (ex. 'neural machine translation'), you can overwrite this value by URL parameter 'keyword'",
-      "value": ""
+      "value": "",
       "required": "false"
     },
     "ARXIV_CHECK_FROM_DAYS_BEFORE": {
       "description": "Searching start date (in days from now, default value is '7'), you can overwrite this value by URL parameter 'from_days_before'",
-      "value": ""
+      "value": "",
       "required": "false"
     },
     "ARXIV_CHECK_TO_DAYS_BEFORE": {
       "description": "Searching end date (in days from now, default value is '6'), you can overwrite this value by URL parameter 'to_days_before'",
-      "value": ""
+      "value": "",
       "required": "false"
     },
     "ARXIV_CHECK_AVOID_DUPLICATED_POSTING": {
       "description": "Suppress duplicated posting (while heroku dyno is alive, default value is 'ON'), you can overwrite this value by URL parameter 'avoid_duplicated_posting'",
-      "value": ""
+      "value": "",
       "required": "false"
     },
     "ARXIV_CHECK_TRANS": {
       "description": "Translation target language code ('ja' for Japanese, 'none' for no translation, default value is 'ja'), you can overwrite this value by URL parameter 'trans_tgt_lang'",
-      "value": ""
+      "value": "",
       "required": "false"
     }
   },
