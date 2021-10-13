@@ -14,12 +14,14 @@ from trans_api.trans_util import trans, debug_msg, DEBUG_FILE
 from .adapter_slackclient import slack_events_adapter, CLIENT, SLACK_VERIFICATION_TOKEN
 
 # Options to collect latest papers from arXiv
-ARXIV_CHECK_CHANNEL = os.environ.get('ARXIV_CHECK_CHANNEL','arxiv')  # This doesn't work because channel ID is needed
-ARXIV_CHECK_KEYWORD = os.environ.get('ARXIV_CHECK_KEYWORD','neural machine translation')
-ARXIV_CHECK_FROM_DAYS_BEFORE = os.environ.get('ARXIV_CHECK_FROM_DAYS_BEFORE','7')
-ARXIV_CHECK_TO_DAYS_BEFORE = os.environ.get('ARXIV_CHECK_TO_DAYS_BEFORE','6')
-ARXIV_CHECK_AVOID_DUPLICATED_POSTING = os.environ.get('ARXIV_CHECK_AVOID_DUPLICATED_POSTING','ON')
-ARXIV_CHECK_TRANS = os.environ.get('ARXIV_CHECK_TRANS','ja')  # 'none' means no translation
+ARXIV_CHECK_CHANNEL                  = os.environ.get('ARXIV_CHECK_CHANNEL','arxiv')                      if '' != os.environ.get('ARXIV_CHECK_CHANNEL','arxiv')                      else 'arxiv'  # This doesn't work because channel ID is needed
+ARXIV_CHECK_KEYWORD                  = os.environ.get('ARXIV_CHECK_KEYWORD','neural machine translation') if '' != os.environ.get('ARXIV_CHECK_KEYWORD','neural machine translation') else 'neural machine translation'
+ARXIV_CHECK_FROM_DAYS_BEFORE         = os.environ.get('ARXIV_CHECK_FROM_DAYS_BEFORE','7')                 if '' != os.environ.get('ARXIV_CHECK_FROM_DAYS_BEFORE','7')                 else '7'
+ARXIV_CHECK_TO_DAYS_BEFORE           = os.environ.get('ARXIV_CHECK_TO_DAYS_BEFORE','6')                   if '' != os.environ.get('ARXIV_CHECK_TO_DAYS_BEFORE','6')                   else '6'
+ARXIV_CHECK_MAX_PAPER_NUM            = os.environ.get('ARXIV_CHECK_MAX_PAPER_NUM','10')                   if '' != os.environ.get('ARXIV_CHECK_MAX_PAPER_NUM','10')                   else '10'
+ARXIV_CHECK_MAX_TRANS_NUM            = os.environ.get('ARXIV_CHECK_MAX_TRANS_NUM','5')                    if '' != os.environ.get('ARXIV_CHECK_MAX_TRANS_NUM','5')                    else '5'
+ARXIV_CHECK_AVOID_DUPLICATED_POSTING = os.environ.get('ARXIV_CHECK_AVOID_DUPLICATED_POSTING','ON')        if '' != os.environ.get('ARXIV_CHECK_AVOID_DUPLICATED_POSTING','ON')        else 'ON'
+ARXIV_CHECK_TRANS                    = os.environ.get('ARXIV_CHECK_TRANS','ja')                           if '' != os.environ.get('ARXIV_CHECK_TRANS','ja')                           else 'ja'  # 'none' means no translation
 
 # Create your views here.
 
@@ -98,6 +100,16 @@ def arxiv_check(request):
         dt_to = dt_now - datetime.timedelta(days=int(ARXIV_CHECK_TO_DAYS_BEFORE))
     else:
         dt_to = dt_now
+    # Max paper num
+    if 'max_paper_num' in request.GET:
+        max_paper_num = int(request.GET.get('max_paper_num'))
+    else:
+        max_paper_num = int(ARXIV_CHECK_MAX_PAPER_NUM)
+    # Max trans num
+    if 'max_trans_num' in request.GET:
+        max_trans_num = int(request.GET.get('max_paper_num'))
+    else:
+        max_trans_num = int(ARXIV_CHECK_MAX_TRANS_NUM)
     # Option to avoid duplicated posting
     if 'avoid_duplicated_posting' in request.GET:
         avoid_duplicated_posting = request.GET.get('avoid_duplicated_posting')
@@ -106,23 +118,27 @@ def arxiv_check(request):
     # Building searching query and getting search result
     arxiv_check_query = 'abs:"'+keyword+'" AND submittedDate:[{} TO {}]'.format(dt_from.strftime('%Y%m%d%H%M%S'), dt_to.strftime('%Y%m%d%H%M%S'))
     message += 'arxiv_check_query: '+arxiv_check_query
-    arxiv_search = arxiv.Search(query=arxiv_check_query, sort_by=arxiv.SortCriterion.SubmittedDate)
+    arxiv_search = arxiv.Search(query=arxiv_check_query, sort_by=arxiv.SortCriterion.SubmittedDate, max_results=max_paper_num)
     # Translation option ('' means on translation)
     if 'trans_tgt_lang' in request.GET:
         trans_tgt_lang = request.GET.get('trans_tgt_lang')
     else:
         trans_tgt_lang = ARXIV_CHECK_TRANS
     # Send search result (one message corresponding to one paper)
+    trans_count = 0
     for result in arxiv_search.results():
         paper_info = 'Title: '+result.title+'\n'
-        if trans_tgt_lang != 'none':
-            paper_info_rep = trans('Title: '+result.title, 'en', trans_tgt_lang)+'\n'
         paper_info += 'Authors: '+', '.join(list(map(str, result.authors)))+'\n'
         paper_info += 'Abstract: '+result.summary.replace('\n', ' ')+'\n'
-        if trans_tgt_lang != 'none':
-            paper_info_rep += trans('Abstract: '+result.summary.replace('\n', ' '), 'en', trans_tgt_lang)+'\n'
         paper_info += 'PDF URL: '+result.pdf_url+'\n'
         paper_info += 'Published Date: '+result.published.strftime('%Y/%m/%d %H:%M:%S')+'\n'
+        if trans_tgt_lang != 'none':
+            if trans_count < max_trans_num:
+                paper_info_rep = trans('Title: '+result.title, 'en', trans_tgt_lang)+'\n'
+                paper_info_rep += trans('Abstract: '+result.summary.replace('\n', ' '), 'en', trans_tgt_lang)+'\n'
+                trans_count += 1
+            else:
+                paper_info_rep = 'Stopped auto translation because too many papers are found.'
         # If the same paper_info/channel is already posted recently (recorded in ARXIV_MSG_HASHED_FILE), ignore event
         if avoid_duplicated_posting == 'ON':
             msg_info = 'post_channel: '+post_channel+'\tpaper_info_digest: '+hashlib.sha224(paper_info.encode("utf-8")).hexdigest()

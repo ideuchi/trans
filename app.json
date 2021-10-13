@@ -49,6 +49,16 @@
       "value": "",
       "required": false
     },
+    "ARXIV_CHECK_MAX_PAPER_NUM": {
+      "description": "Maximum numbers of articles to get in a query (default value is '10'), you can overwrite this value by URL parameter 'max_paper_num'",
+      "value": "",
+      "required": false
+    },
+    "ARXIV_CHECK_MAX_TRANS_NUM": {
+      "description": "Maximum numbers of articles to translate in a query (default value is '5'), you can overwrite this value by URL parameter 'max_trans_num'",
+      "value": "",
+      "required": false
+    },
     "ARXIV_CHECK_AVOID_DUPLICATED_POSTING": {
       "description": "Suppress duplicated posting (while heroku dyno is alive, default value is 'ON'), you can overwrite this value by URL parameter 'avoid_duplicated_posting'",
       "value": "",
