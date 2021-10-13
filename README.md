@@ -238,8 +238,10 @@ ARXIV_CHECK_CHANNEL                 ：arXivから取得した論文情報の投
 ARXIV_CHECK_KEYWORD                 ：arXivから取得する論文の検索キーワード
 ARXIV_CHECK_FROM_DAYS_BEFORE        ：何日前以降の論文を検索対象にするか（デフォルト値は'7'）
 ARXIV_CHECK_TO_DAYS_BEFORE          ：何日前以前の論文を検索対象にするか（デフォルト値は'6'）
-ARXIV_CHECK_AVOID_DUPLICATED_POSTING：短時間での重複投稿を避けるためのフラグ（デフォルト値は'ON'、Herokuのdynoが生存している間は重複投稿しなくなります）
+ARXIV_CHECK_MAX_PAPER_NUM           ：最大何本の論文を取得するか（デフォルト値は'10'）
+ARXIV_CHECK_AVOID_DUPLICATED_POSTING：短時間で同じ論文の取得を避けるためのフラグ（デフォルト値は'ON'、Herokuのdynoが動作を停止するまで（他にリクエストが無い場合は30分程度）は同じ論文を取得しなくなります）
 ARXIV_CHECK_TRANS                   ：翻訳先言語（翻訳不要な場合は'none'、日本語に翻訳する場合は'ja'）
+ARXIV_CHECK_MAX_TRANS_NUM           ：最大何本の論文を翻訳するか（翻訳先の言語が指定されていた場合に有効、デフォルト値は'5'）
 ~~~~
 
 3. デプロイ時のパラメタはURLパラメタで上書きできます。指定しなかったパラメタは、デプロイ時のパラメタが使われます。複数チャンネルへの投稿、複数キーワードでの検索を行いたい場合は、こちらを活用と便利です。
