@@ -48,11 +48,24 @@ $ git clone https://github.com/ideuchi/trans
 
 ## 設定方法(Setup)
 
-API設定ファイルを編集します。
+環境変数を設定するか、API設定ファイルを編集します。
 
-Edit the setting file of API.
+Set environment variable or edit the setting file for API.
+
+設定値は https://mt-auto-minhon-mlt.ucri.jgn-x.jp/content/setting/user/edit/ を参照してください。
+
+See https://mt-auto-minhon-mlt.ucri.jgn-x.jp/content/setting/user/edit/ for checking setting value.
 
 ```sh
+# How to set environment variable
+export TEXTRA_NAME=YOUR_NAME
+export TEXTRA_KEY=YOUR_KEY
+export TEXTRA_SECRET=YOUR_SECRET
+```
+
+
+```sh
+# How to edit setting file
 $ cd trans
 $ vi APIInfo.ini
 ```
@@ -60,9 +73,9 @@ $ vi APIInfo.ini
 編集前(before editing)：
 ~~~~
 # (required) account information for API
-name=                                            # input your account name
-key=                                             # input your API key
-secret=                                          # input your API secret
+name=${TEXTRA_NAME}                              # input your account name
+key=${TEXTRA_KEY}                                # input your API key
+secret=${TEXTRA_SECRET}                          # input your API secret
 =====snip=====
 ↓
 編集後(after editing)：
@@ -179,9 +192,9 @@ heroku create  # heroku app name is displayed by this command, https://[heroku_a
 git push heroku main
 
 # replace string of [] by your own
-heroku config:set NAME=[TexTra_user_name]
-heroku config:set KEY=[TexTra_key]
-heroku config:set SECRET=[TexTra_secret]
+heroku config:set TEXTRA_NAME=[TexTra_user_name]
+heroku config:set TEXTRA_KEY=[TexTra_key]
+heroku config:set TEXTRA_SECRET=[TexTra_secret]
 heroku config:set SLACK_BOT_TOKEN=[Slack_Bot_User_OAuth_Token in 4.]
 heroku config:set SLACK_VERIFICATION_TOKEN=[Slack_Verification_Token in 5.]
 ```
@@ -210,16 +223,19 @@ Herokuのdynoは最終リクエストから30分程度で、消えてしまい�
 ログを確認する場合、処理の流れは以下のようになっています。  
 
 ~~~~
-処理のログ例（"Hello."を"こんにちは。"に翻訳する例）：
+処理のログ例（"こんにちは。"を"Hello."に翻訳する例）：
 a. "starting handle reaction_added event."（reaction_addedイベントを受信した旨を記録）  
-b. "emoji is one of target lang: emoji = jp, lang = ja"（絵文字の種類から翻訳処理対象かどうかを判定、この例では日本語への翻訳）  
-c. "new event to handle: Ev027BNB2U4V"（Slackから複数回イベントが通知されることがあるため、新規イベントか処理中のイベントかを判定）  
-d. "src message: Hello."（翻訳対象文字列を記録）  
-e. "lang_detect cmd: ./trans lang_detect "Hello.""（言語判定コマンドの実行を記録）  
-f. "lang_detect src_lang: it"（翻訳対象文字列の言語判定結果を記録、この例ではイタリア語、短い表現だとたまに間違える）  
-g. "call get_trans_pairs(it, ja)"（翻訳対象文字列から、指定された言語への翻訳パス確認を行った旨を記録、この例ではイタリア語から日本語）  
-h. "get_trans_pairs() result: ['it_en', 'en_ja']"（翻訳パスの結果を記録、この例ではイタリア語→英語、英語→日本語）
-i. "response to reaction_added event:  
+b. "recieved emoji is one of translation target languages: emoji = us, lang = en"（絵文字の種類から翻訳処理対象かどうかを判定、この例では英語への翻訳）  
+c. "This event is a new event to handle: Ev027BNB2U4V"（Slackから複数回イベントが通知されることがあるため、新規イベントか処理中のイベントかを判定）  
+d. "src message: こんにちは。"（翻訳対象文字列を記録）  
+e. "(trans_util) lang_detect cmd: ./trans lang_detect "こんにちは。""（言語判定コマンドの実行を記録）  
+f. "(trans_util) lang_detect src_lang: ja"（翻訳対象文字列の言語判定結果を記録、この例では日本語、英語の短い表現だとたまに間違える）  
+g. "(trans_util) msg_info created: lang_pair: ja_en   message_digest: xxxxx..."（短時間に同じメッセージを同じ言語方向に翻訳しないために、言語方向とメッセージのハッシュ値を作成）
+h. "(trans_util) new message to translate: lang_pair: ja_en   message_digest: xxxxx..."（未翻訳のメッセージであれば翻訳を行う）
+i. "(trans_util) call get_trans_pairs(ja, en)"（翻訳対象文字列から、指定された言語への翻訳パス確認を行った旨を記録、直接翻訳できない場合は日本語や英語を仲介する）  
+j. "(trans_util) get_trans_pairs() result: ['ja_en']"（翻訳パスの結果を記録）
+k. "getting a engine for ja_en from pt-BR_ja..."（カスタム翻訳エンジンの指定があるかどうかを確認、ポルトガル語(ブラジル)については元々voicetraNTで翻訳するよう設定）
+l. "response to reaction_added event:  
     cmd: ./trans text "Hello." generalNT it en | ./trans text "" generalNT en ja  
     res: こんにちは。"（呼び出した翻訳支援コマンドと、翻訳結果を記録。）
 ~~~~

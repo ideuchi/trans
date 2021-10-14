@@ -71,7 +71,7 @@ def get_engine(lang_pair):
 
 def trans(src_message, src_lang, tgt_lang, record_history=True):
     # If the same message/lang-pair is already translated recently (recorded in TRANSLATED_MSG_HASHED_FILE), ignore event
-    msg_info = 'lang_pair: '+src_lang+'-'+tgt_lang+'\tmessage_digest: '+hashlib.sha224(src_message.encode("utf-8")).hexdigest()
+    msg_info = 'lang_pair: '+src_lang+'_'+tgt_lang+'\tmessage_digest: '+hashlib.sha224(src_message.encode("utf-8")).hexdigest()
     debug_msg('(trans_util) msg_info created: '+msg_info)
     if os.path.isfile(TRANSLATED_MSG_HASHED_FILE):
         with open(TRANSLATED_MSG_HASHED_FILE, 'r') as f:
