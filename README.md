@@ -163,6 +163,7 @@ Slackアプリ作成に必要なファイルも本リポジトリに入れてあ
 - groups:history
 - im:history
 - mpim:history
+
 ※プライベートチャンネルに翻訳アプリを連携させたい場合は、以下も追加する必要があります。
 - groups:read
 - groups:write
