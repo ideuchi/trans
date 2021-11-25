@@ -138,11 +138,11 @@ try:
     TGT = TGT + d['resultset']['result']['langdetect']['1']['lang']
   if KIND == 'word_lookup':
     d = json.loads(res.text)
-    if d['resultset']['result']['lookup'][0]['length'] > 0:
-      for n in range(d['resultset']['result']['lookup'][0]['length']+1):
+    if len(d['resultset']['result']['lookup']) != 0:
+      for n in range(len(d['resultset']['result']['lookup'][0]['term'])):
         TGT = TGT + d['resultset']['result']['lookup'][0]['term'][n]['target'] + '\n'
     else:
-      TGT = '<null>'
+      TGT = ''
   print(TGT)
 except Exception as e:
   print('=== Error ===')
