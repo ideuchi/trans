@@ -1,0 +1,38 @@
+#!/bin/bash
+
+## This is an command for stream translation. (input: stdin, output: stdout)
+## For sequencial processing, this command accept texts from stdin and wait for ${wait_time} to call translation API.
+
+engine=${1:-"generalNT"}
+src_lang=${2:-"en"}
+tgt_lang=${3:-"ja"}
+wait_time=${4:-"0.5"}
+
+# make named pipe for translation
+pipe_name=trans_np_${BASHPID}
+mkfifo ${pipe_name}
+
+# delete named pipe when terminated
+trap 'echo "trap SIGINT signal, deleting named pipe."; rm ${pipe_name}; exit'  SIGINT
+trap 'echo "trap SIGTERM signal, deleting named pipe."; rm ${pipe_name}; exit' SIGTERM
+
+# if the src text arrived, wait ${wait_time} seconds and send all texts in named pipe to API (loop)
+while true
+do
+  while read trans_unit
+  do
+    echo "debug: API called."; (echo ${trans_unit}; timeout ${wait_time} cat ${pipe_name}) | ./trans text "" ${engine} ${src_lang} ${tgt_lang}
+  done < ${pipe_name}
+done &
+trans_pid=$!
+
+# wait texts from standard input and send text to the pipe
+while read stdin_line
+do
+  echo ${stdin_line} > ${pipe_name}
+done
+
+# kill looping process and delete named pipe
+kill ${trans_pid}
+rm ${pipe_name}
+
