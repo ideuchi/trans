@@ -6,13 +6,16 @@ src=${2:-""}                    # source text/file/directory
 engine=${3:-"generalNT"}        # default is generalNT (edit this param as you like)
 src_lang=${4:-"ja"}             # default source language is Japanese (edit this param as you like)
 tgt_lang=${5:-"en"}             # default target language is English (edit this param as you like)
-debug=${6:-""}                  # debug flag
+split=${6:-"0"}                 # default split option is off
+history=${7:-"0"}               # default history option is without history
+xml=${8:-"0"}                   # default xml option is off
+debug=${9:-""}                  # debug flag
 
 python=python3                  # command name for executing python script
 interval=3                      # interval (seconds) for confirming status of file translation
 
 
-## Set API information (if engine, src_lang, tgt_lang are defined in APIinfo.ini, command line options are overwritten)
+## Set API information (if engine, src_lang, tgt_lang, split, history, xml, debug are defined in APIinfo.ini, command line options are overwritten)
 trans_dir=$(cd $(dirname $0); pwd)
 . "${trans_dir}/APIinfo.ini"    # set API information (name, key, secret) and request tool (sh/py)
 
@@ -22,7 +25,7 @@ if [ -p /dev/stdin ]; then src=`cat -`; fi
 
 ## Explanation of usage
 if [ "${src}" == "" ] ; then
-  echo "Usage: trans [kind] 'source text' [engine] [source language] [target language]"
+  echo "Usage: trans [kind] 'source text' [engine] [source language] [target language] [split] [history] [xml]"
   echo "       [kind] can be selected from 'text' 'file' 'dir'"
   echo "       [engine], [source language], [target language] can be selected from engine list and language list in APIinfo.ini"
   exit 1
@@ -106,8 +109,15 @@ text_sh() {
   parameters["secret"]=${secret}
   parameters["type"]=json
   parameters["text"]=${text}
+  parameters["split"]=${split}
+  parameters["history"]=${history}
+  parameters["xml"]=${xml}
   
-  echo -e `api_request ${url} parameters 2> /dev/null | awk -F'"text-t":"' '{ print $2 }' | awk -F'"' '$0 != "" { print $1 }'`
+  if [[ ${history} == "0" ]]; then
+    echo -e `api_request ${url} parameters 2> /dev/null | awk -F'"text-t":"' '{ print $2 }' | awk -F'"' '$0 != "" { print $1 }'`
+  else
+    echo -e `api_request ${url} parameters 2> /dev/null | awk -F'"result":{"text":"' '{ print $2 }' | awk -F'"' '$0 != "" { print $1 }'`
+  fi
 }
 
 
@@ -133,6 +143,8 @@ file_set_sh() {
   parameters["mt_id"]=${mt_id}
   parameters["title"]=trans
   parameters["file"]=file
+  parameters["split"]=${split}
+  parameters["history"]=${history}
   
   echo -e `api_request ${url} parameters ${file} 2> /dev/null | awk -F'"pid":' '{ print $2 }' | awk -F'}' '$0 != "" { print $1 }'`
 }
@@ -200,7 +212,7 @@ function file_trans(){
     pid=`file_set_sh ${file_src}`
   fi
   if [ "${tool}" == "py" ]; then
-    pid=`${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} "file" "set" "${file_src}" ${engine} ${src_lang} ${tgt_lang} ${debug}`
+    pid=`${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} "file" "set" "${file_src}" ${engine} ${src_lang} ${tgt_lang} ${split} ${history} ${xml} ${debug}`
   fi
   
   state=0
@@ -263,7 +275,6 @@ function dir_trans(){
           *.srt)  ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
           *.po)   ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
           *.pot)  ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
-          *.pdf)  ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
           *.odt)  ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
           *.odp)  ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
           *.ods)  ${command} "${src_dir}/${child}" "${tgt_dir}/${child}" ;;
@@ -344,7 +355,7 @@ if [ "${kind}" == "text" ]; then
     text_sh "${src}"
   fi
   if [ "${tool}" == "py" ]; then
-    ${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} ${kind} "" "${src}" ${engine} ${src_lang} ${tgt_lang} ${debug}
+    ${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} ${kind} "" "${src}" ${engine} ${src_lang} ${tgt_lang} ${split} ${history} ${xml} ${debug}
   fi
 fi
 
@@ -369,7 +380,7 @@ if [ "${kind}" == "lang_detect" ]; then
     lang_detect_sh "${src}"
   fi
   if [ "${tool}" == "py" ]; then
-    ${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} ${kind} "" "${src}" ${engine} ${src_lang} ${tgt_lang} ${debug}
+    ${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} ${kind} "" "${src}" ${engine} ${src_lang} ${tgt_lang} ${split} ${history} ${xml} ${debug}
   fi
 fi
 
@@ -378,6 +389,6 @@ if [ "${kind}" == "word_lookup" ]; then
     word_lookup_sh "${src}" ${engine} ${src_lang}
   fi
   if [ "${tool}" == "py" ]; then
-    ${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} ${kind} "" "${src}" ${engine} ${src_lang} ${tgt_lang} ${debug}
+    ${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} ${kind} "" "${src}" ${engine} ${src_lang} ${tgt_lang} ${split} ${history} ${xml} ${debug}
   fi
 fi

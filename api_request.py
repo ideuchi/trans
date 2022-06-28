@@ -15,6 +15,9 @@ Python3 OAuthRequest Module for NICT TexTra translation API
     7: translation engine (for detail, see APIinfo.ini)
     8: source language (for detail, see APIinfo.ini)
     9: target language (for detail, see APIinfo.ini)
+   10: sentence split option (0:OFF, 1:ON)
+   11: translation with context option (0:OFF, 1/2/3:sentence num, 50:only target context)
+   12: xml translation option (0:OFF, 1:ON and escape &'"<> characters, 2:ON and escape <>)
 """
 
 import sys
@@ -29,10 +32,15 @@ SECRET = sys.argv[3]
 KIND = sys.argv[4]          # text/file/dir/lang_detect/word_lookup
 SUBKIND = sys.argv[5]       # file: set/status/get
 SRC = sys.argv[6]
-ENGINE = '' if len(sys.argv) <= 7 else sys.argv[7]
-SRC_LANG = '' if len(sys.argv) <= 8 else sys.argv[8]
-TGT_LANG = '' if len(sys.argv) <= 9 else sys.argv[9]
-DEBUG = '' if len(sys.argv) <= 10 else sys.argv[10]
+ENGINE = 'generalNT' if len(sys.argv) <= 7 else sys.argv[7]
+SRC_LANG = 'ja' if len(sys.argv) <= 8 else sys.argv[8]
+TGT_LANG = 'en' if len(sys.argv) <= 9 else sys.argv[9]
+
+SPLIT = '0' if len(sys.argv) <= 10 else sys.argv[10]
+HISTORY = '0' if len(sys.argv) <= 11 else sys.argv[11]
+XML = '0' if len(sys.argv) <= 12 else sys.argv[12]
+
+DEBUG = '' if len(sys.argv) <= 13 else sys.argv[13]
 
 URL = ''
 URL_BASE = 'https://mt-auto-minhon-mlt.ucri.jgn-x.jp/api/'
@@ -52,8 +60,11 @@ if KIND == 'text':
   params = {
     'key': KEY,
     'name': NAME,
-    'text': SRC,
     'type': 'json',
+    'text': SRC,
+    'split': SPLIT,
+    'history': HISTORY,
+    'xml': XML,
   }
 if KIND == 'file' and SUBKIND == 'set':
   FILE = {'file': open(SRC, 'rb')}
@@ -63,40 +74,42 @@ if KIND == 'file' and SUBKIND == 'set':
   params = {
     'key': KEY,
     'name': NAME,
+    'type': 'json',
     'title': TITLE,
     'file': FILE,
     'mt_id': ENGINE + '_' + SRC_LANG + '_' + TGT_LANG,
-    'type': 'json',
+    'split': SPLIT,
+    'history': HISTORY,
   }
 if KIND == 'file' and SUBKIND == 'status':
   params = {
     'key': KEY,
     'name': NAME,
-    'pid': SRC,
     'type': 'json',
+    'pid': SRC,
   }
 if KIND == 'file' and SUBKIND == 'get':
   params = {
     'key': KEY,
     'name': NAME,
-    'pid': SRC,
     'type': 'json',
+    'pid': SRC,
   }
 if KIND == 'lang_detect':
   params = {
     'key': KEY,
     'name': NAME,
-    'text': SRC,
     'type': 'json',
+    'text': SRC,
   }
 if KIND == 'word_lookup':
   params = {
     'key': KEY,
     'name': NAME,
+    'type': 'json',
     'text': SRC,
     'pid': ENGINE,
     'lang_s': SRC_LANG,
-    'type': 'json',
   }
 
 try:
@@ -119,10 +132,13 @@ try:
     print(res.text)
   if KIND == 'text':
     d = json.loads(res.text)
-    for n in range(len(d['resultset']['result']['information']['sentence'])):
-      TGT = TGT + d['resultset']['result']['information']['sentence'][n]['text-t']
-      if n != len(d['resultset']['result']['information']['sentence']) - 1:
-        TGT = TGT + '\n'
+    if len(d['resultset']['result']['information']) != 0:
+      for n in range(len(d['resultset']['result']['information']['sentence'])):
+        TGT = TGT + d['resultset']['result']['information']['sentence'][n]['text-t']
+        if n != len(d['resultset']['result']['information']['sentence']) - 1:
+          TGT = TGT + '\n'
+    else:
+      TGT = d['resultset']['result']['text']
   if KIND == 'file' and SUBKIND == 'set':
     d = json.loads(res.text)
     TGT = d['resultset']['result']['pid']
