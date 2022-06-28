@@ -26,6 +26,7 @@ slack_flag_langs = {
     'bf':'fr','bi':'fr','bj':'fr','bl':'fr','cd':'fr','cf':'fr','cg':'fr','ci':'fr','cm':'fr','cp':'fr','dj':'fr','fr':'fr','ga':'fr','gf':'fr','gn':'fr','gp':'fr','mc':'fr','ml':'fr','mq':'fr','nc':'fr','ne':'fr','pf':'fr','pm':'fr','re':'fr','sn':'fr','td':'fr','tf':'fr','tg':'fr','wf':'fr','yt':'fr',
     'id':'id',
     'it':'it','sm':'it','va':'it',
+    'in':'hi',
     'jp':'ja',
     'kh':'km',
     'kp':'ko','kr':'ko',
