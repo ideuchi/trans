@@ -70,8 +70,8 @@ $ cd trans
 $ vi APIInfo.ini
 ```
 
-編集前(before editing)：
 ~~~~
+編集前(before editing)：
 # (required) account information for API
 name=${TEXTRA_NAME}                              # input your account name
 key=${TEXTRA_KEY}                                # input your API key
