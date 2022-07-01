@@ -21,7 +21,7 @@ while true
 do
   while read trans_unit
   do
-    echo "debug: API called."; (echo ${trans_unit}; timeout ${wait_time} cat ${pipe_name}) | ./trans text "" ${engine} ${src_lang} ${tgt_lang}
+    (echo ${trans_unit}; timeout ${wait_time} cat ${pipe_name}) | ./trans text "" ${engine} ${src_lang} ${tgt_lang}
   done < ${pipe_name}
 done &
 trans_pid=$!
