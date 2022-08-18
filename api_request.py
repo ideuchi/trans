@@ -80,6 +80,7 @@ if KIND == 'file' and SUBKIND == 'set':
     'mt_id': ENGINE + '_' + SRC_LANG + '_' + TGT_LANG,
     'split': SPLIT,
     'history': HISTORY,
+    'xml': XML,
   }
 if KIND == 'file' and SUBKIND == 'status':
   params = {
