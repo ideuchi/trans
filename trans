@@ -145,6 +145,7 @@ file_set_sh() {
   parameters["file"]=file
   parameters["split"]=${split}
   parameters["history"]=${history}
+  parameters["xml"]=${xml}
   
   echo -e `api_request ${url} parameters ${file} 2> /dev/null | awk -F'"pid":' '{ print $2 }' | awk -F'}' '$0 != "" { print $1 }'`
 }
