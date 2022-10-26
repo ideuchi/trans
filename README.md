@@ -240,8 +240,8 @@ i. "(trans_util) call get_trans_pairs(ja, en)"（翻訳対象文字列から、�
 j. "(trans_util) get_trans_pairs() result: ['ja_en']"（翻訳パスの結果を記録）
 k. "getting a engine for ja_en from pt-BR_ja..."（カスタム翻訳エンジンの指定があるかどうかを確認、ポルトガル語(ブラジル)については元々voicetraNTで翻訳するよう設定）
 l. "response to reaction_added event:  
-    cmd: ./trans text "Hello." generalNT it en | ./trans text "" generalNT en ja  
-    res: こんにちは。"（呼び出した翻訳支援コマンドと、翻訳結果を記録。）
+    cmd: ./trans text "こんにちは。" generalNT en ja  
+    res: Hello."（呼び出した翻訳支援コマンドと、翻訳結果を記録。）
 ~~~~
 
 
