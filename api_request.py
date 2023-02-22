@@ -54,7 +54,7 @@ SRC_LANG = 'ja' if (len(sys.argv) <= 8 or sys.argv[8] == '') else sys.argv[8]
 TGT_LANG = 'en' if (len(sys.argv) <= 9 or sys.argv[9] == '') else sys.argv[9]
 
 ## for translation
-if KIND == 'text' or KIND == 'file':
+if KIND == 'text' or KIND == 'file' or KIND == 'lang_detect' or KIND == 'word_lookup':
   SPLIT = '0' if (len(sys.argv) <= 10 or sys.argv[10] == '') else sys.argv[10]
   HISTORY = '0' if (len(sys.argv) <= 11 or sys.argv[11] == '') else sys.argv[11]
   XML = '0' if (len(sys.argv) <= 12 or sys.argv[12] == '') else sys.argv[12]
