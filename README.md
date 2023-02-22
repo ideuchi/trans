@@ -193,6 +193,10 @@ Herokuのアプリ名は、後で必要になるので、控えておきます�
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/ideuchi/trans)  
 
+最低限必要な設定は、TexTraのAPI情報が3つ（name, key, secret）と、上記手順で書き留めたSlackのToken2つ（OAuth Token, Verification Token）です。
+TexTraのAPI情報は https://mt-auto-minhon-mlt.ucri.jgn-x.jp/content/setting/user/edit/ にログインすると確認できます。
+
+
 gitコマンドとherokuコマンドを使う場合は、以下のようにコマンドを実行します。  
 ```sh
 git clone https://github.com/ideuchi/trans
