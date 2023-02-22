@@ -1,18 +1,41 @@
 #!/bin/bash
 
-## Settings for translation
-kind=${1:-"text"}               # translation kind (text/file/dir/lang_detect/word_lookup), default kind is text
-src=${2:-""}                    # source text/file/directory
-engine=${3:-"generalNT"}        # default is generalNT (edit this param as you like)
+## Settings for translation/lang_detect/word_lookup/bilingual_root_get/adaptation
+kind=${1:-"text"}               # translation kind (text/file/dir/lang_detect/word_lookup/bilingual_root_get/adaptation_set/adaptation_update/adaptation_get), default kind is text
+src=${2:-""}                    # source text/file/directory, "" for bilingual_root_get/adaptation_get, title/id for adaptation_set/adaptation_update
+engine=${3:-"generalNT"}        # default is generalNT (edit this param as you like), "" for bilingual_root_get, base engine for adaptation
 src_lang=${4:-"ja"}             # default source language is Japanese (edit this param as you like)
 tgt_lang=${5:-"en"}             # default target language is English (edit this param as you like)
+
+## Params for translation
 split=${6:-"0"}                 # default split option is off
 history=${7:-"0"}               # default history option is without history
 xml=${8:-"0"}                   # default xml option is off
 debug=${9:-""}                  # debug flag
 
+## Params for bilingual_root_get/adatation_get
+order=${6:-"update%2CASC"}      # default order option is without order.  you can specifies comma-separated keys and sort orders (key:update, order: ASC or DESC (e.g. update%2CASC)).
+limit=${7:-"200"}               # default limit is 200 (edit this param as you like)
+offset=${8:-"0"}                # default offset is 0 (edit this param as you like)
+debug=${9:-""}                  # debug flag
+
+## Params for adaptation_set/adaptation_update
+simmap=${6:-"0"}                # default training method is adaptation (0: adaptation, 1: adaptation+EBMT, 2: EBMT)
+usebilingual=${7:-"0"}          # default bilingual text type is selection (0: data selection, 1: all belonging group data)
+bilingual_n=${8:-""}            # default training bilingual text(forward direction) option is without bilingual text. You can specify multiple bilingual text IDs by separating them with commas (e.g. 12345%2C12346)
+bilingual_r=${9:-""}            # default training bilingual text(backward direction) option is without bilingual text. You can specify multiple bilingual text IDs by separating them with commas (e.g. 12345%2C12346)
+usedoc=${10:-"0"}               # default document data option is without document data (0: without data, 1:all belonging group data)
+uselog=${11:-"0"}               # default recycled data option is without recycled data (0: without data, 1:all belonging group data)
+dev_n=${12:-""}                 # default dev bilingual text(forward direction) option is without bilingual text. You can specify multiple bilingual text IDs by separating them with commas (e.g. 12345%2C12346).
+dev_r=${13:-""}                 # default dev bilingual text(backward direction) option is without bilingual text. You can specify multiple bilingual text IDs by separating them with commas (e.g. 12345%2C12346).
+test_n=${14:-""}                # default test bilingual text(forward direction) option is without bilingual text. You can specify multiple bilingual text IDs by separating them with commas (e.g. 12345%2C12346).
+test_r=${15:-""}                # default test bilingual text(backward direction) option is without bilingual text. You can specify multiple bilingual text IDs by separating them with commas (e.g. 12345%2C12346).
+autoupdate=${16:-"0"}           # default autoupdate option is off
+debug=${17:-""}                 # debug flag
+
+
 python=python3                  # command name for executing python script
-interval=3                      # interval (seconds) for confirming status of file translation
+interval=10                     # interval (seconds) for confirming status of file translation / adaptation
 
 
 ## Set API information (if engine, src_lang, tgt_lang, split, history, xml, debug are defined in APIinfo.ini, command line options are overwritten)
@@ -24,10 +47,10 @@ if [ -p /dev/stdin ]; then src=`cat -`; fi
 
 
 ## Explanation of usage
-if [ "${src}" == "" ] ; then
-  echo "Usage: trans [kind] 'source text' [engine] [source language] [target language] [split] [history] [xml]"
-  echo "       [kind] can be selected from 'text' 'file' 'dir'"
-  echo "       [engine], [source language], [target language] can be selected from engine list and language list in APIinfo.ini"
+if [ "${kind}" == "" ] || { { [ "${kind}" != "bilingual_root_get" ] && [ "${kind}" != "adaptation_get" ]; } && [ "${src}" == "" ]; }; then
+  echo "Basic Usage: trans [kind] 'source text' [engine] [source language] [target language] ([split] [history] [xml])"
+  echo "             [kind] can be selected from 'text' 'file' 'dir' ('lang_detect' 'word_lookup' 'bilingual_root_get' 'adaptation_set' 'adaptation_update' 'adaptation_get')"
+  echo "             [engine], [source language], [target language] can be selected from engine list and language list in APIinfo.ini"
   exit 1
 fi
 
@@ -195,7 +218,7 @@ file_get_sh() {
 }
 
 
-## Function for file translation (set/status/get)
+## Function for file translation (set/status/get) (used if request tool is "sh")
 # This function uses shell variables below, call this function after setting these variables
 # ${name}, ${key}, ${secret}, ${engine}, ${src_lang}, ${tgt_lang}, ${tool}
 # This function receives parameters below, call this function with these parameters
@@ -245,7 +268,7 @@ function file_trans(){
 }
 
 
-## Function for directory translation (recursively)
+## Function for directory translation (recursively) (used if request tool is "sh")
 function dir_trans(){
   local src_dir=${1}
   local tgt_dir=${2}
@@ -292,7 +315,7 @@ function dir_trans(){
 }
 
 
-## Function for language detect
+## Function for language detect (used if request tool is "sh")
 # This function uses shell variables below, call this function after setting these variables
 # ${name}, ${key}, ${secret}, ${tool}
 # This function receives parameters below, call this function with these parameters
@@ -316,7 +339,7 @@ function lang_detect_sh(){
 }
 
 
-## Function for word lookup
+## Function for word lookup (used if request tool is "sh")
 # This function uses shell variables below, call this function after setting these variables
 # ${name}, ${key}, ${secret}, ${tool}
 # This function receives parameters below, call this function with these parameters
@@ -343,6 +366,142 @@ function word_lookup_sh(){
   echo -e `api_request ${url} parameters 2> /dev/null | awk -F'"target":"' '{ for (i=2;i<=NF;i++) print $i }' | awk -F'"' '$0 != "" { print $1 }' | sed -z 's/\n/\\\n/g'`
 }
 
+
+## Function for bilingual_root_get (used if request tool is "sh")
+# This function uses shell variables below, call this function after setting these variables
+# ${name}, ${key}, ${secret}, ${src_lang}(as lang_s), ${tgt_lang}(as lang_t), ${order}, ${limit}, ${offset}
+bilingual_root_get_sh() {
+  # Make request URL
+  url=https://mt-auto-minhon-mlt.ucri.jgn-x.jp/api/bilingual_root/get/
+  
+  # Prepare parameters for api_request
+  declare -A parameters
+  parameters["name"]=${name}
+  parameters["key"]=${key}
+  parameters["secret"]=${secret}
+  parameters["type"]=json
+  if [ "${src_lang}" != "" ]; then
+    parameters["lang_s"]=${src_lang}
+  fi
+  if [ "${tgt_lang}" != "" ]; then
+    parameters["lang_t"]=${tgt_lang}
+  fi
+  if [ "${order}" != "" ]; then
+    parameters["order"]=${order}
+  fi
+  if [ "${limit}" != "" ]; then
+    parameters["limit"]=${limit}
+  fi
+  if [ "${offset}" != "" ]; then
+    parameters["offset"]=${offset}
+  fi
+  
+  echo -e "`api_request ${url} parameters 2> /dev/null | awk -F'"list":' '{ print $2 }' | awk -F'}}}' '$0 != "" { print $1 }' | sed -e 's/"},{"id"/"},\n{"id"/g' | sed -e "s/^\[//g" | sed -e "s/\]$//g"`"
+}
+
+
+## Function for adaptation (set) (used if request tool is "sh")
+# This function uses shell variables below, call this function after setting these variables
+# ${name}, ${key}, ${secret}, ${src}(as id/title), ${engine}(as base), ${src_lang}(as lang_s), ${tgt_lang}(as lang_t), ${simmap}, ${usebilingual}, ${bilingual_n}, ${bilingual_r}, ${usedoc}, ${uselog}, ${dev_n}, ${dev_r}, ${test_n}, ${test_r}, ${autoupdate}
+# Execute bilingual_root_get_sh to get the id for the values set in the shell variables below
+# ${bilingual_n}, ${bilingual_r}, ${dev_n}, ${dev_r}, ${test_n}, ${test_r}
+adaptation_set_sh() {
+  # Make request URL
+  url=https://mt-auto-minhon-mlt.ucri.jgn-x.jp/api/mt_adapt/set/
+
+  # Prepare parameters for api_request
+  declare -A parameters
+  parameters["name"]=${name}
+  parameters["key"]=${key}
+  parameters["secret"]=${secret}
+  parameters["type"]=json
+  parameters["title"]=${src}
+  parameters["lang_s"]=${src_lang}
+  parameters["lang_t"]=${tgt_lang}
+  parameters["base"]=${engine}
+  parameters["simmap"]=${simmap}
+  parameters["usebilingual"]=${usebilingual}
+  parameters["bilingual_n"]=${bilingual_n}
+  parameters["bilingual_r"]=${bilingual_r}
+  parameters["usedoc"]=${usedoc}
+  parameters["uselog"]=${uselog}
+  parameters["dev_n"]=${dev_n}
+  parameters["dev_r"]=${dev_r}
+  parameters["test_n"]=${test_n}
+  parameters["test_r"]=${test_r}
+  parameters["autoupdate"]=${autoupdate}
+
+  echo -e "`api_request ${url} parameters 2> /dev/null | awk -F'"message":"' '{ print $2 }' | awk -F'"' '$0 != "" { print $1 }'`"
+}
+
+## Function for adaptation (update) (used if request tool is "sh")
+# This function uses shell variables below, call this function after setting these variables
+# ${name}, ${key}, ${secret}, ${src}(as id/title), ${engine}(as base), ${src_lang}(as lang_s), ${tgt_lang}(as lang_t), ${simmap}, ${usebilingual}, ${bilingual_n}, ${bilingual_r}, ${usedoc}, ${uselog}, ${dev_n}, ${dev_r}, ${test_n}, ${test_r}, ${autoupdate}
+# Execute bilingual_root_get_sh to get the id for the values set in the shell variables below
+# ${bilingual_n}, ${bilingual_r}, ${dev_n}, ${dev_r}, ${test_n}, ${test_r}
+# Execute adaptation_get_sh to get the id for the values set in the shell variables below
+# ${id}
+adaptation_update_sh() {
+  # Make request URL
+  url=https://mt-auto-minhon-mlt.ucri.jgn-x.jp/api/mt_adapt/update/
+
+  # Prepare parameters for api_request
+  declare -A parameters
+  parameters["name"]=${name}
+  parameters["key"]=${key}
+  parameters["secret"]=${secret}
+  parameters["type"]=json
+  parameters["id"]=${src}
+  parameters["title"]=${src}"_update"
+  parameters["lang_s"]=${src_lang}
+  parameters["lang_t"]=${tgt_lang}
+  parameters["base"]=${engine}
+  parameters["simmap"]=${simmap}
+  parameters["usebilingual"]=${usebilingual}
+  parameters["bilingual_n"]=${bilingual_n}
+  parameters["bilingual_r"]=${bilingual_r}
+  parameters["usedoc"]=${usedoc}
+  parameters["uselog"]=${uselog}
+  parameters["dev_n"]=${dev_n}
+  parameters["dev_r"]=${dev_r}
+  parameters["test_n"]=${test_n}
+  parameters["test_r"]=${test_r}
+  parameters["autoupdate"]=${autoupdate}
+
+  echo -e "`api_request ${url} parameters 2> /dev/null | awk -F'"message":"' '{ print $2 }' | awk -F'"' '$0 != "" { print $1 }'`"
+}
+
+## Function for adaptation (get) (used if request tool is "sh")
+# This function uses shell variables below, call this function after setting these variables
+# ${name}, ${key}, ${secret}, ${src_lang}(as lang_s), ${tgt_lang}(as lang_t), ${order}, ${limit}, ${offset}
+adaptation_get_sh() {
+  # Make request URL
+  url=https://mt-auto-minhon-mlt.ucri.jgn-x.jp/api/mt_adapt/get/
+
+  # Prepare parameters for api_request
+  declare -A parameters
+  parameters["name"]=${name}
+  parameters["key"]=${key}
+  parameters["secret"]=${secret}
+  parameters["type"]=json
+  if [ "${src_lang}" != "" ]; then
+    parameters["lang_s"]=${src_lang}
+  fi
+  if [ "${tgt_lang}" != "" ]; then
+    parameters["lang_t"]=${tgt_lang}
+  fi
+  if [ "${order}" != "" ]; then
+    parameters["order"]=${order}
+  fi
+  if [ "${limit}" != "" ]; then
+    parameters["limit"]=${limit}
+  fi
+  if [ "${offset}" != "" ]; then
+    parameters["offset"]=${offset}
+  fi
+
+  echo -e "`api_request ${url} parameters 2> /dev/null | awk -F'"list":' '{ print $2 }' | awk -F'}}}' '$0 != "" { print $1 }' | sed -e 's/"},{"id"/"},\n{"id"/g' | sed -e "s/^\[//g" | sed -e "s/\]$//g"`"
+}
 
 
 ## Main procedure
@@ -391,5 +550,41 @@ if [ "${kind}" == "word_lookup" ]; then
   fi
   if [ "${tool}" == "py" ]; then
     ${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} ${kind} "" "${src}" ${engine} ${src_lang} ${tgt_lang} ${split} ${history} ${xml} ${debug}
+  fi
+fi
+
+if [ "${kind}" == "bilingual_root_get" ]; then
+  if [ "${tool}" == "sh" ]; then
+    bilingual_root_get_sh
+  fi
+  if [ "${tool}" == "py" ]; then
+    ${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} "bilingual_root" "get" "" "" ${src_lang} ${tgt_lang} ${order} ${limit} ${offset} ${debug}
+  fi
+fi
+
+if [ "${kind}" == "adaptation_set" ]; then
+  if [ "${tool}" == "sh" ]; then
+    adaptation_set_sh
+  fi
+  if [ "${tool}" == "py" ]; then
+    ${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} "adaptation" "set" "${src}" ${engine} ${src_lang} ${tgt_lang} ${simmap} ${usebilingual} ${bilingual_n} ${bilingual_r} ${usedoc} ${uselog} ${dev_n} ${dev_r} ${test_n} ${test_r} ${autoupdate} ${debug}
+  fi
+fi
+
+if [ "${kind}" == "adaptation_update" ]; then
+  if [ "${tool}" == "sh" ]; then
+    adaptation_update_sh
+  fi
+  if [ "${tool}" == "py" ]; then
+    ${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} "adaptation" "update" "${src}" ${engine} ${src_lang} ${tgt_lang} ${simmap} ${usebilingual} ${bilingual_n} ${bilingual_r} ${usedoc} ${uselog} ${dev_n} ${dev_r} ${test_n} ${test_r} ${autoupdate} ${debug}
+  fi
+fi
+
+if [ "${kind}" == "adaptation_get" ]; then
+  if [ "${tool}" == "sh" ]; then
+    adaptation_get_sh
+  fi
+  if [ "${tool}" == "py" ]; then
+    ${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} "adaptation" "get" "" "" ${src_lang} ${tgt_lang} ${order} ${limit} ${offset} ${debug}
   fi
 fi

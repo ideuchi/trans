@@ -1,0 +1,6 @@
+# Linuxコマンド マニュアルファイル foo.1 をみんなの自動翻訳エンジンで英日翻訳する例
+po4a-gettextize -f man -m foo.1 -p foo.po
+ruby wrap.rb foo.po > foo_wrap.po
+trans file foo_wrap.po minnaPE en ja
+ruby dewrap.rb foo_wrap_ja.po | ruby repair.rb > foo_ja.po
+po4a-translate -f man -m foo.1 -p foo_ja.po -l ja/foo.1

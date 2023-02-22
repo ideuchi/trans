@@ -22,7 +22,7 @@ slack_flag_langs = {
     'at':'de','ch':'de','de':'de','li':'de',
     'ac':'en','ag':'en','ai':'en','as':'en','au':'en','bb':'en','bn':'en','bs':'en','bw':'en','bz':'en','ca':'en','ck':'en','cx':'en','dm':'en','fj':'en','fk':'en','fm':'en','gb':'en','gd':'en','gg':'en','gh':'en','gi':'en','gm':'en','gs':'en','gu':'en','gy':'en','im':'en','io':'en','je':'en','jm':'en','ke':'en','ki':'en','kn':'en','ky':'en','lc':'en','lr':'en','mp':'en','ms':'en','mu':'en','mw':'en','na':'en','nf':'en','ng':'en','nz':'en','pn':'en','pw':'en','sb':'en','sc':'en','sg':'en','sh':'en','sl':'en','ss':'en','ta':'en','tc':'en','tt':'en','ug':'en','um':'en','us':'en','vc':'en','vg':'en','vi':'en','zm':'en','zw':'en',
     'ar':'es','bo':'es','cl':'es','co':'es','cr':'es','cu':'es','do':'es','ea':'es','ec':'es','es':'es','gq':'es','gt':'es','hn':'es','ic':'es','mx':'es','ni':'es','pa':'es','pe':'es','pr':'es','py':'es','sv':'es','uy':'es','ve':'es',
-    'ph':'fp',  # added
+    'ph':'fp',
     'bf':'fr','bi':'fr','bj':'fr','bl':'fr','cd':'fr','cf':'fr','cg':'fr','ci':'fr','cm':'fr','cp':'fr','dj':'fr','fr':'fr','ga':'fr','gf':'fr','gn':'fr','gp':'fr','mc':'fr','ml':'fr','mq':'fr','nc':'fr','ne':'fr','pf':'fr','pm':'fr','re':'fr','sn':'fr','td':'fr','tf':'fr','tg':'fr','wf':'fr','yt':'fr',
     'id':'id',
     'it':'it','sm':'it','va':'it',
@@ -31,12 +31,13 @@ slack_flag_langs = {
     'kh':'km',
     'kp':'ko','kr':'ko',
     'mn':'mn',
-    'mm':'my',  # added
+    'mm':'my',
     'np':'ne',
     'ao':'pt','cv':'pt','gw':'pt','mz':'pt','pt':'pt','st':'pt',
     'br':'pt-BR',
     'ru':'ru',
     'th':'th',
+    'ua':'uk',  # added
     'vn':'vi',
     'cn':'zh-CN',
     'hk':'zh-TW','mo':'zh-TW','tw':'zh-TW',

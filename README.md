@@ -2,11 +2,17 @@
 
 「trans」はテキスト／ファイル／ディレクトリを翻訳するバッチ翻訳ツールです。  
 翻訳したいデータが多めで、無料翻訳サイトに何度もコピー＆ペーストを繰り返すのは面倒、という場合に役立ちます。  
-ファイル／ディレクトリを翻訳する場合、テキストファイルだけでなく、HTMLやOffice形式、PDFも翻訳対象となります。
+ファイル／ディレクトリを翻訳する場合、テキストファイルだけでなく、HTMLやOffice形式のファイルも翻訳対象となります。
 
 "trans" is batch translation tool for translating text/file/directory.  
 This is useful if you have much data to translate and you don't want to copy and paste many times into a free translation site.  
-When translating file/directory, not only text files but also HTML, Office formats, and PDFs are also translated.
+When translating file/directory, not only text files but also HTML and Office format files are also translated.
+
+「trans」のオプション機能として、言語判定、訳語検索、アダプテーション（対訳集ID確認とアダプテーションの実行と一覧確認）も可能です。  
+READMEの説明には、翻訳機能と利用例を中心に記載してありますので、詳細は「trans」コマンドのコメントを参照してください。
+
+"trans" can process language detection, dictionary search, adaptation (getting bilingual corpus IDs and training / listing adaptation models) as optional features.  
+This README only explains translation features and example usages, you can see more details in the comments of "trans" command.
 
 
 ## 事前準備(Prerequisites)
