@@ -38,13 +38,17 @@ Python3 OAuthRequest Module for NICT TexTra translation API
 """
 
 import sys
-from requests_oauthlib import OAuth1
+from requests_oauthlib import OAuth2Session
+from oauthlib.oauth2 import BackendApplicationClient
 import requests as req
 import json
 
 NAME = sys.argv[1]
 KEY = sys.argv[2]
 SECRET = sys.argv[3]
+
+client = BackendApplicationClient(client_id=KEY)
+oauth = OAuth2Session(client=client)
 
 KIND = sys.argv[4]          # text/file/lang_detect/word_lookup/bilingual_root/adaptation
 SUBKIND = sys.argv[5]       # file: set/status/get, bilingual_root: get, adaptation: set/status/get
@@ -104,11 +108,13 @@ if KIND == 'adaptation':
   elif SUBKIND == 'get':
     URL = URL_BASE + 'mt_adapt/get/'
 
-consumer = OAuth1(KEY , SECRET)
+token_url = 'https://mt-auto-minhon-mlt.ucri.jgn-x.jp/oauth2/token.php'
+token = oauth.fetch_token(token_url=token_url, client_id=KEY, client_secret=SECRET)
 TGT = ''
 
 if KIND == 'text':
   params = {
+    'access_token': token['access_token'],
     'key': KEY,
     'name': NAME,
     'type': 'json',
@@ -123,6 +129,7 @@ if KIND == 'file' and SUBKIND == 'set':
   if len(SRC) > 20:
     TITLE = SRC[-20:]
   params = {
+    'access_token': token['access_token'],
     'key': KEY,
     'name': NAME,
     'type': 'json',
@@ -135,6 +142,7 @@ if KIND == 'file' and SUBKIND == 'set':
   }
 if KIND == 'file' and SUBKIND == 'status':
   params = {
+    'access_token': token['access_token'],
     'key': KEY,
     'name': NAME,
     'type': 'json',
@@ -142,6 +150,7 @@ if KIND == 'file' and SUBKIND == 'status':
   }
 if KIND == 'file' and SUBKIND == 'get':
   params = {
+    'access_token': token['access_token'],
     'key': KEY,
     'name': NAME,
     'type': 'json',
@@ -149,6 +158,7 @@ if KIND == 'file' and SUBKIND == 'get':
   }
 if KIND == 'lang_detect':
   params = {
+    'access_token': token['access_token'],
     'key': KEY,
     'name': NAME,
     'type': 'json',
@@ -156,6 +166,7 @@ if KIND == 'lang_detect':
   }
 if KIND == 'word_lookup':
   params = {
+    'access_token': token['access_token'],
     'key': KEY,
     'name': NAME,
     'type': 'json',
@@ -165,6 +176,7 @@ if KIND == 'word_lookup':
   }
 if KIND == 'bilingual_root' and SUBKIND == 'get':
   params = {
+    'access_token': token['access_token'],
     'key': KEY,
     'name': NAME,
     'type': 'json',
@@ -186,6 +198,7 @@ if KIND == 'bilingual_root' and SUBKIND == 'get':
     params.pop('offset')
 if KIND == 'adaptation' and SUBKIND == 'set':
   params = {
+    'access_token': token['access_token'],
     'key': KEY,
     'name': NAME,
     'type': 'json',
@@ -207,6 +220,7 @@ if KIND == 'adaptation' and SUBKIND == 'set':
   }
 if KIND == 'adaptation' and SUBKIND == 'update':
   params = {
+    'access_token': token['access_token'],
     'key': KEY,
     'name': NAME,
     'type': 'json',
@@ -229,6 +243,7 @@ if KIND == 'adaptation' and SUBKIND == 'update':
   }
 if KIND == 'adaptation' and SUBKIND == 'get':
   params = {
+    'access_token': token['access_token'],
     'key': KEY,
     'name': NAME,
     'type': 'json',
@@ -251,25 +266,25 @@ if KIND == 'adaptation' and SUBKIND == 'get':
 
 try:
   if KIND == 'text':
-    res = req.post(URL, data=params, auth=consumer)
+    res = req.post(URL, data=params)
   if KIND == 'file' and SUBKIND == 'set':
-    res = req.post(URL, data=params, params=params, auth=consumer, files=FILE)
+    res = req.post(URL, data=params, params=params, files=FILE)
   if KIND == 'file' and SUBKIND == 'status':
-    res = req.post(URL, data=params, auth=consumer)
+    res = req.post(URL, data=params)
   if KIND == 'file' and SUBKIND == 'get':
-    res = req.post(URL, data=params, auth=consumer)
+    res = req.post(URL, data=params)
   if KIND == 'lang_detect':
-    res = req.post(URL, data=params, auth=consumer)
+    res = req.post(URL, data=params)
   if KIND == 'word_lookup':
-    res = req.post(URL, data=params, auth=consumer)
+    res = req.post(URL, data=params)
   if KIND == 'bilingual_root' and SUBKIND == 'get':
-    res = req.post(URL, data=params, auth=consumer)
+    res = req.post(URL, data=params)
   if KIND == 'adaptation' and SUBKIND == 'set':
-    res = req.post(URL, data=params, auth=consumer)
+    res = req.post(URL, data=params)
   if KIND == 'adaptation' and SUBKIND == 'update':
-    res = req.post(URL, data=params, auth=consumer)
+    res = req.post(URL, data=params)
   if KIND == 'adaptation' and SUBKIND == 'get':
-    res = req.post(URL, data=params, auth=consumer)
+    res = req.post(URL, data=params)
   res.encoding = 'utf-8'
   if DEBUG == 'print_res':
     print('[res]')

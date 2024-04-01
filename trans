@@ -9,7 +9,7 @@ tgt_lang=${5:-"en"}             # default target language is English (edit this 
 
 ## Params for translation
 split=${6:-"0"}                 # default split option is off
-history=${7:-"0"}               # default history option is without history
+historytrans=${7:-"0"}          # default history option is without history
 xml=${8:-"0"}                   # default xml option is off
 debug=${9:-""}                  # debug flag
 
@@ -31,14 +31,16 @@ dev_r=${13:-""}                 # default dev bilingual text(backward direction)
 test_n=${14:-""}                # default test bilingual text(forward direction) option is without bilingual text. You can specify multiple bilingual text IDs by separating them with commas (e.g. 12345%2C12346).
 test_r=${15:-""}                # default test bilingual text(backward direction) option is without bilingual text. You can specify multiple bilingual text IDs by separating them with commas (e.g. 12345%2C12346).
 autoupdate=${16:-"0"}           # default autoupdate option is off
-debug=${17:-""}                 # debug flag
+if [ "${debug}" != "print_res" ] && [ "${17}" == "print_res" ]; then
+  debug=${17}                   # debug flag
+fi
 
 
 python=python3                  # command name for executing python script
 interval=10                     # interval (seconds) for confirming status of file translation / adaptation
 
 
-## Set API information (if engine, src_lang, tgt_lang, split, history, xml, debug are defined in APIinfo.ini, command line options are overwritten)
+## Set API information (if engine, src_lang, tgt_lang, split, historytrans, xml, debug are defined in APIinfo.ini, command line options are overwritten)
 trans_dir=$(cd $(dirname $0); pwd)
 . "${trans_dir}/APIinfo.ini"    # set API information (name, key, secret) and request tool (sh/py)
 
@@ -65,13 +67,21 @@ api_request() {
   request_url=${1}
   declare -n parameters_ref=${2}
   request_file=${3}
-  
+
   # Concatenate all parameters
   additional_parameters=""
   request_secret=""
+  request_id=""
   for refkey in "${!parameters_ref[@]}"; do
     if [ "${refkey}" == "secret" ] ; then
       request_secret="${parameters_ref[${refkey}]}"
+    elif [ "${refkey}" == "key" ] ; then
+      request_id="${parameters_ref[${refkey}]}"
+      if [ "${additional_parameters}" == "" ] ; then
+        additional_parameters="${refkey}=${parameters_ref[${refkey}]}"
+      else
+        additional_parameters="${additional_parameters}\\n${refkey}=${parameters_ref[${refkey}]}"
+      fi
     else
       if [ "${additional_parameters}" == "" ] ; then
         additional_parameters="${refkey}=${parameters_ref[${refkey}]}"
@@ -80,13 +90,25 @@ api_request() {
       fi
     fi
   done
-  additional_parameters=`echo -e "${additional_parameters}" | sort -t '=' -k1 | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\\\n/g'`
-  
+ 
+  echo "debug1 after parsing parameters: request_secret=${request_secret}"
+  echo "debug1 after parsing parameters: request_id=${request_id}"
+  echo "debug1 after parsing parameters: addtional_parameters=${additional_parameters}"
+
+  # Get OAuth2 access token
+  access_token=`curl -X POST "https://mt-auto-minhon-mlt.ucri.jgn-x.jp/oauth2/token.php" -d "grant_type=client_credentials" -d "client_id=${request_id}" -d "client_secret=${request_secret}" | awk -F 'access_token":"' '{ print $2 }' | awk -F '"' '{ print $1 }' | sed -z 's/\n//g'`
+
+  echo "debug2 after getting OAuth2 access token: access_token=${access_token}"
+
+  additional_parameters=`echo -e "access_token=${access_token}\n${additional_parameters}" | sort -t '=' -k1 | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\\\n/g'`
+
+  echo "debug3 before requesting: addtional_parameters=${additional_parameters}"
+
   # OAuth preparation
   request_url_string=$(echo -n "${request_url}" | curl -Gso /dev/null -w %{url_effective} --data-urlencode @- "" | cut -c 3-)
   oauth_nonce=$(head -c 32 < /dev/urandom | base64 | tr -d '+/=')
   oauth_timestamp=$(date +%s)
-  oauth_parameters="oauth_consumer_key=${parameters_ref["key"]}\\noauth_nonce=${oauth_nonce}\\noauth_timestamp=${oauth_timestamp}\\noauth_signature_method=HMAC-SHA1\\noauth_version=1.0\\n"
+  oauth_parameters="oauth_consumer_key=${parameters_ref["key"]}\\noauth_nonce=${oauth_nonce}\\noauth_timestamp=${oauth_timestamp}\\noauth_signature_method=HMAC-SHA1\\noauth_version=2.0\\n"
   request_parameters_string=`echo -e "${oauth_parameters}${additional_parameters}" | sort -t '=' -k1 | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\&/g' | curl -Gso /dev/null -w %{url_effective} --data-urlencode @- "" | sed -E 's/..(.*).../\1/'`
   signature_base_string="POST&${request_url_string}&${request_parameters_string}"
   signing_key="${request_secret}&"
@@ -96,16 +118,16 @@ api_request() {
   request_url_parameters=`echo ${additional_parameters} | sed -e 's/\\\\n/\&/g'`
   if [ "${request_file}" == "" ] ; then
     # text translation API accepts parameters with 'curl -d' option
-    curl_request_text="curl -X POST --url ${request_url} -d \"${request_url_parameters}\" -H \"Authorization: OAuth oauth_consumer_key=${parameters_ref["key"]}, oauth_nonce=${oauth_nonce}, oauth_signature=${oauth_signature}, oauth_signature_method=HMAC-SHA1, oauth_timestamp=${oauth_timestamp}, oauth_version=1.0\""
+    curl_request_text="curl -X POST --url ${request_url} -d \"${request_url_parameters}\" -H \"Authorization: OAuth oauth_consumer_key=${parameters_ref["key"]}, oauth_nonce=${oauth_nonce}, oauth_signature=${oauth_signature}, oauth_signature_method=HMAC-SHA1, oauth_timestamp=${oauth_timestamp}, oauth_version=2.0\""
     eval ${curl_request_text}
   else
     # file translation API accepts parameters with URL and 'curl -F' option
     request_curl_options=`echo ${additional_parameters} | sed -e 's/\\\\n/ -F /g'`
     if [ "${request_file:0:2}" == "//" ] ; then
-     curl_request_file_statget="curl -X POST --url \"${request_url}?${request_url_parameters}\" -F ${request_curl_options} -H \"Authorization: OAuth oauth_consumer_key=${parameters_ref["key"]}, oauth_nonce=${oauth_nonce}, oauth_signature=${oauth_signature}, oauth_signature_method=HMAC-SHA1, oauth_timestamp=${oauth_timestamp}, oauth_version=1.0\""
+     curl_request_file_statget="curl -X POST --url \"${request_url}?${request_url_parameters}\" -F ${request_curl_options} -H \"Authorization: OAuth oauth_consumer_key=${parameters_ref["key"]}, oauth_nonce=${oauth_nonce}, oauth_signature=${oauth_signature}, oauth_signature_method=HMAC-SHA1, oauth_timestamp=${oauth_timestamp}, oauth_version=2.0\""
       eval ${curl_request_file_statget}
     else
-      curl_request_file_set="curl -X POST --url \"${request_url}?${request_url_parameters}\" -F ${request_curl_options} -F file=${request_file} -H \"Authorization: OAuth oauth_consumer_key=${parameters_ref["key"]}, oauth_nonce=${oauth_nonce}, oauth_signature=${oauth_signature}, oauth_signature_method=HMAC-SHA1, oauth_timestamp=${oauth_timestamp}, oauth_version=1.0\""
+      curl_request_file_set="curl -X POST --url \"${request_url}?${request_url_parameters}\" -F ${request_curl_options} -F file=${request_file} -H \"Authorization: OAuth oauth_consumer_key=${parameters_ref["key"]}, oauth_nonce=${oauth_nonce}, oauth_signature=${oauth_signature}, oauth_signature_method=HMAC-SHA1, oauth_timestamp=${oauth_timestamp}, oauth_version=2.0\""
       eval ${curl_request_file_set}
     fi
   fi
@@ -133,10 +155,10 @@ text_sh() {
   parameters["type"]=json
   parameters["text"]=${text}
   parameters["split"]=${split}
-  parameters["history"]=${history}
+  parameters["history"]=${historytrans}
   parameters["xml"]=${xml}
   
-  if [[ ${history} == "0" ]]; then
+  if [[ ${historytrans} == "0" ]]; then
     echo -e `api_request ${url} parameters 2> /dev/null | awk -F'"text-t":"' '{ print $2 }' | awk -F'"' '$0 != "" { print $1 }'`
   else
     echo -e `api_request ${url} parameters 2> /dev/null | awk -F'"result":{"text":"' '{ print $2 }' | awk -F'"' '$0 != "" { print $1 }'`
@@ -167,7 +189,7 @@ file_set_sh() {
   parameters["title"]=trans
   parameters["file"]=file
   parameters["split"]=${split}
-  parameters["history"]=${history}
+  parameters["history"]=${historytrans}
   parameters["xml"]=${xml}
   
   echo -e `api_request ${url} parameters ${file} 2> /dev/null | awk -F'"pid":' '{ print $2 }' | awk -F'}' '$0 != "" { print $1 }'`
@@ -236,7 +258,7 @@ function file_trans(){
     pid=`file_set_sh ${file_src}`
   fi
   if [ "${tool}" == "py" ]; then
-    pid=`${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} "file" "set" "${file_src}" ${engine} ${src_lang} ${tgt_lang} ${split} ${history} ${xml} ${debug}`
+    pid=`${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} "file" "set" "${file_src}" ${engine} ${src_lang} ${tgt_lang} ${split} ${historytrans} ${xml} ${debug}`
   fi
   
   state=0
@@ -515,7 +537,7 @@ if [ "${kind}" == "text" ]; then
     text_sh "${src}"
   fi
   if [ "${tool}" == "py" ]; then
-    ${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} ${kind} "" "${src}" ${engine} ${src_lang} ${tgt_lang} ${split} ${history} ${xml} ${debug}
+    ${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} ${kind} "" "${src}" ${engine} ${src_lang} ${tgt_lang} ${split} ${historytrans} ${xml} ${debug}
   fi
 fi
 
@@ -540,7 +562,7 @@ if [ "${kind}" == "lang_detect" ]; then
     lang_detect_sh "${src}"
   fi
   if [ "${tool}" == "py" ]; then
-    ${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} ${kind} "" "${src}" ${engine} ${src_lang} ${tgt_lang} ${split} ${history} ${xml} ${debug}
+    ${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} ${kind} "" "${src}" ${engine} ${src_lang} ${tgt_lang} ${split} ${historytrans} ${xml} ${debug}
   fi
 fi
 
@@ -549,7 +571,7 @@ if [ "${kind}" == "word_lookup" ]; then
     word_lookup_sh "${src}" ${engine} ${src_lang}
   fi
   if [ "${tool}" == "py" ]; then
-    ${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} ${kind} "" "${src}" ${engine} ${src_lang} ${tgt_lang} ${split} ${history} ${xml} ${debug}
+    ${python} ${trans_dir}/api_request.py ${name} ${key} ${secret} ${kind} "" "${src}" ${engine} ${src_lang} ${tgt_lang} ${split} ${historytrans} ${xml} ${debug}
   fi
 fi
 

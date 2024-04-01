@@ -17,11 +17,12 @@ trap 'echo "trap SIGINT signal, deleting named pipe."; rm ${pipe_name}; exit'  S
 trap 'echo "trap SIGTERM signal, deleting named pipe."; rm ${pipe_name}; exit' SIGTERM
 
 # if the src text arrived, wait ${wait_time} seconds and send all texts in named pipe to API (loop)
+trans_dir=$(cd $(dirname $0); pwd)
 while true
 do
   while read trans_unit
   do
-    (echo ${trans_unit}; timeout ${wait_time} cat ${pipe_name}) | ./trans text "" ${engine} ${src_lang} ${tgt_lang}
+    (echo ${trans_unit}; timeout ${wait_time} cat ${pipe_name}) | "${trans_dir}/trans" text "" ${engine} ${src_lang} ${tgt_lang}
   done < ${pipe_name}
 done &
 trans_pid=$!
